@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MCSR Ranked Stats — Graphic Generator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,700&family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ── Navigation ───────────────────────────────────────── -->
+  <nav class="nav" id="nav">
+    <div class="container nav-inner">
+      <a href="#" class="brand">
+        <span class="brand-icon">⏱</span>
+        <span class="brand-name">MCSR Ranked Stats</span>
+      </a>
+      <button class="btn btn-green btn-sm" onclick="scrollToGenerator()">Get Started</button>
+    </div>
+  </nav>
+
+  <!-- ── Hero ─────────────────────────────────────────────── -->
+  <section class="hero">
+    <div class="hero-grid"></div>
+    <div class="hero-glow"></div>
+    <div class="container hero-content">
+
+      <span class="pill">v1.0 — Now Live</span>
+
+      <h1 class="hero-headline">
+        Track Your<br>
+        <em class="text-green">Speedrun</em> Rankings
+      </h1>
+
+      <p class="hero-generator-label">Graphic Generator</p>
+
+      <p class="hero-subtext">
+        Generate, compare, and climb the ranks.<br>
+        The ultimate stat card generator for Minecraft speedrunners.
+      </p>
+
+      <div class="hero-buttons">
+        <button class="btn btn-green btn-lg" onclick="scrollToGenerator()">
+          Generate My Stats
+        </button>
+        <a
+          href="https://mcsrranked.com/leaderboard"
+          target="_blank"
+          rel="noopener"
+          class="btn btn-outline-white btn-lg"
+        >🏆 Leaderboard</a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── Stats band ────────────────────────────────────────── -->
+  <div class="stats-band">
+    <div class="container">
+      <div class="stats-grid">
+
+        <div class="stat-card">
+          <div class="stat-icon">👥</div>
+          <div class="stat-number">50K+</div>
+          <div class="stat-label">Runners Tracked</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon">🏃</div>
+          <div class="stat-number">2M+</div>
+          <div class="stat-label">Runs Analyzed</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon">⏱</div>
+          <div class="stat-number">~9:34</div>
+          <div class="stat-label">Avg PB Time</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon">🏆</div>
+          <div class="stat-number" id="stat-top-elo">—</div>
+          <div class="stat-label">Top Rank ELO</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Generator ─────────────────────────────────────────── -->
+  <section class="section generator-section" id="generator">
+    <div class="container">
+
+      <div class="section-header">
+        <h2>Generate Your Stats Card</h2>
+        <p>Enter any MCSR Ranked player username to instantly generate their stats card.</p>
+      </div>
+
+      <div class="search-card">
+        <div class="search-row">
+          <div class="search-input-wrap">
+            <span class="search-icon">🔍</span>
+            <input
+              type="text"
+              id="username-input"
+              placeholder="Enter Minecraft username…"
+              autocomplete="off"
+              spellcheck="false"
+            >
+          </div>
+          <button class="btn btn-green btn-lg" id="search-btn">Search Player</button>
+        </div>
+      </div>
+
+      <div id="status-area"></div>
+
+      <div id="card-wrapper" class="hidden card-output-area">
+        <div id="card"></div>
+        <div class="card-actions">
+          <button class="btn btn-green" id="download-btn">⬇ Download Card</button>
+          <p id="download-error" class="error-inline hidden"></p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── Features ──────────────────────────────────────────── -->
+  <section class="section features-section">
+    <div class="container">
+
+      <div class="section-header">
+        <h2>Everything You Need</h2>
+        <p>Built for the MCSR community</p>
+      </div>
+
+      <div class="features-grid">
+
+        <div class="feature-card">
+          <div class="feature-icon">⚡</div>
+          <h3>Instant Stats</h3>
+          <p>Real-time data pulled directly from the official MCSR Ranked API. Always up to date.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">🎨</div>
+          <h3>Beautiful Cards</h3>
+          <p>Download high-resolution PNG cards styled to match your rank tier. Share anywhere.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">📊</div>
+          <h3>Full History</h3>
+          <p>Season and career stats side by side — wins, losses, completion rate, and personal best.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Footer ────────────────────────────────────────────── -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div class="brand brand-sm">
+        <span class="brand-icon">⏱</span>
+        <span class="brand-name">MCSR Ranked Stats</span>
+      </div>
+      <p class="footer-text">
+        Powered by the
+        <a href="https://mcsrranked.com" target="_blank" rel="noopener">MCSR Ranked API</a>
+        · Not affiliated with Mojang or Microsoft
+      </p>
+    </div>
+  </footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
