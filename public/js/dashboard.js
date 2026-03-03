@@ -134,6 +134,15 @@ async function init() {
             document.getElementById('past-due-warning').style.display = '';
         }
 
+        // Toggle widget card based on Pro status
+        if (isPro) {
+            document.getElementById('widget-card-pro').style.display = '';
+            document.getElementById('widget-card-free').style.display = 'none';
+        } else {
+            document.getElementById('widget-card-pro').style.display = 'none';
+            document.getElementById('widget-card-free').style.display = '';
+        }
+
         // Populate widget fields
         currentWidgetToken = me.widget_token || null;
         if (me.mcsr_username) {
@@ -144,19 +153,8 @@ async function init() {
 }
 
 // ── Upgrade button ───────────────────────────────────────────────────────
-document.getElementById('upgrade-btn').addEventListener('click', async () => {
-    const btn = document.getElementById('upgrade-btn');
-    btn.disabled = true;
-    btn.textContent = 'Redirecting…';
-    try {
-        const data = await apiPost('/api/subscribe', {});
-        if (data.error) { showToast(data.error); btn.disabled = false; btn.textContent = 'Upgrade to Pro'; return; }
-        window.location.href = data.url;
-    } catch (err) {
-        showToast('Failed: ' + err.message);
-        btn.disabled = false;
-        btn.textContent = 'Upgrade to Pro';
-    }
+document.getElementById('upgrade-btn').addEventListener('click', () => {
+    window.location.href = '/upgrade.html';
 });
 
 // ── Manage Billing button ─────────────────────────────────────────────────

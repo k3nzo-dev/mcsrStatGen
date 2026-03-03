@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'none';
+    script-src 'self' 'unsafe-inline';
+    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+    font-src https://fonts.gstatic.com;
+    img-src 'self' data:;
+    connect-src 'self';
+  ">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upgrade to Pro — MCSR Ranked Stats</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(28px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateY(12px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0)   scale(1); }
+    }
+
+    /* ── Nav ──────────────────────────────────────────────────────────────── */
+    .up-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255,255,255,0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid transparent;
+      transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+      animation: fadeIn 0.3s ease both;
+    }
+    .up-nav.nav-scrolled {
+      background: rgba(255,255,255,0.95);
+      border-color: var(--border);
+      box-shadow: var(--shadow-sm);
+    }
+    .up-nav-inner {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 0 32px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* ── Hero ─────────────────────────────────────────────────────────────── */
+    .up-hero {
+      position: relative;
+      background: #0d1e10;
+      padding: 72px 0 60px;
+      overflow: hidden;
+      color: #fff;
+      text-align: center;
+      animation: fadeIn 0.4s ease both;
+    }
+    .up-hero-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        repeating-linear-gradient(0deg,   transparent 0, transparent 31px, rgba(58,125,68,0.07) 31px, rgba(58,125,68,0.07) 32px),
+        repeating-linear-gradient(90deg,  transparent 0, transparent 31px, rgba(58,125,68,0.07) 31px, rgba(58,125,68,0.07) 32px);
+      pointer-events: none;
+    }
+    .up-hero-glow {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 70% 55% at 50% -5%, rgba(58,125,68,0.5) 0%, transparent 65%);
+      pointer-events: none;
+    }
+    .up-hero-content {
+      position: relative;
+      z-index: 1;
+      animation: fadeSlideUp 0.45s ease both;
+    }
+    .up-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 900;
+      letter-spacing: -1px;
+      margin-bottom: 12px;
+    }
+    .up-hero-sub {
+      font-size: 1.05rem;
+      color: rgba(255,255,255,0.65);
+      max-width: 500px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* ── Pricing card ─────────────────────────────────────────────────────── */
+    .up-main {
+      max-width: 520px;
+      margin: -36px auto 0;
+      padding: 0 24px 64px;
+      position: relative;
+      z-index: 2;
+    }
+    .pricing-card {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border);
+      padding: 40px 36px;
+      text-align: center;
+      animation: fadeSlideUp 0.5s ease both;
+      animation-delay: 0.1s;
+    }
+    .pricing-card-name {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+    .pricing-card-price {
+      font-size: 2.8rem;
+      font-weight: 900;
+      color: var(--green);
+      letter-spacing: -1.5px;
+      line-height: 1.1;
+      margin-bottom: 4px;
+    }
+    .pricing-card-interval {
+      font-size: 0.88rem;
+      color: var(--muted);
+      font-weight: 500;
+      margin-bottom: 20px;
+    }
+    .pricing-card-desc {
+      font-size: 0.92rem;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+    .pricing-features {
+      text-align: left;
+      list-style: none;
+      margin-bottom: 28px;
+    }
+    .pricing-features li {
+      font-size: 0.9rem;
+      color: var(--text);
+      padding: 7px 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .pricing-features li::before {
+      content: '';
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      background: var(--green-muted);
+      border-radius: 50%;
+      flex-shrink: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath fill='%233a7d44' d='M8.5 13.3 5 9.8l1.1-1.1 2.4 2.4 5-5L14.6 7.2z'/%3E%3C/svg%3E");
+      background-size: 18px;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+    .pricing-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 0 -36px 24px;
+    }
+    .pricing-cta {
+      width: 100%;
+      padding: 14px 24px;
+      font-size: 1rem;
+    }
+    .pricing-cta:disabled {
+      opacity: 0.6;
+      cursor: default;
+    }
+    .pricing-manage-link {
+      display: inline-block;
+      margin-top: 12px;
+      font-size: 0.85rem;
+      color: var(--green);
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      background: none;
+      border: none;
+      font-family: var(--font);
+    }
+    .pricing-manage-link:hover { color: var(--green-dark); }
+
+    /* ── Footer note ──────────────────────────────────────────────────────── */
+    .up-footer-note {
+      text-align: center;
+      font-size: 0.82rem;
+      color: var(--muted);
+      padding: 0 24px 48px;
+    }
+
+    /* ── Loading skeleton ─────────────────────────────────────────────────── */
+    .skeleton {
+      background: linear-gradient(90deg, #e8eef5 25%, #dde5f0 50%, #e8eef5 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: var(--radius-sm);
+    }
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* ── Toast ────────────────────────────────────────────────────────────── */
+    .toast {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      background: var(--text);
+      color: #fff;
+      padding: 12px 22px;
+      border-radius: var(--radius-md);
+      font-size: 0.88rem;
+      font-weight: 600;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.22s;
+      z-index: 999;
+      box-shadow: var(--shadow-lg);
+    }
+    .toast.show {
+      opacity: 1;
+      animation: toastIn 0.25s ease both;
+    }
+
+    @media (max-width: 600px) {
+      .up-main { padding: 0 16px 48px; }
+      .pricing-card { padding: 28px 22px; }
+      .up-nav-inner { padding: 0 18px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Nav ──────────────────────────────────────────────────────────────── -->
+  <nav class="up-nav" id="up-nav">
+    <div class="up-nav-inner">
+      <a href="/" class="brand">
+        <span class="brand-icon">⏱</span>
+        <span class="brand-name">MCSR Ranked Stats</span>
+      </a>
+      <a href="/login.html" class="btn btn-green btn-sm" id="nav-auth-btn">Sign In</a>
+    </div>
+  </nav>
+
+  <!-- ── Hero ─────────────────────────────────────────────────────────────── -->
+  <section class="up-hero">
+    <div class="up-hero-grid"></div>
+    <div class="up-hero-glow"></div>
+    <div class="container up-hero-content">
+      <h1>Upgrade to <span class="text-green">Pro</span></h1>
+      <p class="up-hero-sub" id="hero-sub">Unlock the full streaming experience with a live OBS overlay for your speedruns.</p>
+    </div>
+  </section>
+
+  <!-- ── Pricing card ─────────────────────────────────────────────────────── -->
+  <div class="up-main">
+    <div class="pricing-card">
+      <div class="pricing-card-name" id="product-name">Pro Plan</div>
+      <div class="pricing-card-price" id="product-price">
+        <div class="skeleton" style="height:42px;width:140px;margin:0 auto"></div>
+      </div>
+      <div class="pricing-card-interval" id="product-interval"></div>
+      <p class="pricing-card-desc" id="product-desc">Loading product details...</p>
+
+      <ul class="pricing-features" id="product-features">
+        <li>Live OBS stream overlay</li>
+        <li>Real-time stat updates while you play</li>
+        <li>Custom widget URL for your channel</li>
+        <li>Priority support</li>
+      </ul>
+
+      <div class="pricing-divider"></div>
+
+      <button class="btn btn-green btn-lg pricing-cta" id="cta-btn" disabled>Loading...</button>
+      <button class="pricing-manage-link" id="manage-billing-btn" style="display:none">Manage Billing</button>
+    </div>
+  </div>
+
+  <p class="up-footer-note">Secure payments via Stripe. Cancel anytime.</p>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ── Nav scroll shadow ──────────────────────────────────────────────────
+    window.addEventListener('scroll', () => {
+      document.getElementById('up-nav')
+        .classList.toggle('nav-scrolled', window.scrollY > 10);
+    });
+
+    // ── Toast ──────────────────────────────────────────────────────────────
+    const toast = document.getElementById('toast');
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2800);
+    }
+
+    // ── Format price ───────────────────────────────────────────────────────
+    function formatPrice(amount, currency) {
+      return new Intl.NumberFormat(undefined, {
+        style: 'currency',
+        currency: currency || 'usd',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2,
+      }).format(amount / 100);
+    }
+
+    // ── Init ───────────────────────────────────────────────────────────────
+    async function init() {
+      // Success toast from Stripe redirect
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('upgraded') === '1') {
+        showToast('Welcome to Pro! Your subscription is active.');
+        window.history.replaceState({}, '', '/upgrade.html');
+      }
+
+      // Fetch auth + product info in parallel
+      const [meRes, productRes] = await Promise.allSettled([
+        fetch('/api/me', { headers: { Accept: 'application/json' } }).then(r => r.ok ? r.json() : null),
+        fetch('/api/pro-product', { headers: { Accept: 'application/json' } }).then(r => r.ok ? r.json() : null),
+      ]);
+
+      const me = meRes.status === 'fulfilled' ? meRes.value : null;
+      const product = productRes.status === 'fulfilled' ? productRes.value : null;
+
+      // ── Nav auth button ────────────────────────────────────────────────
+      const navBtn = document.getElementById('nav-auth-btn');
+      if (me) {
+        navBtn.textContent = 'Dashboard';
+        navBtn.href = '/dashboard.html';
+      }
+
+      // ── Product info ───────────────────────────────────────────────────
+      const priceEl = document.getElementById('product-price');
+      const intervalEl = document.getElementById('product-interval');
+      const nameEl = document.getElementById('product-name');
+      const descEl = document.getElementById('product-desc');
+      const heroSub = document.getElementById('hero-sub');
+
+      if (product) {
+        nameEl.textContent = product.name || 'Pro Plan';
+        priceEl.textContent = formatPrice(product.price_amount, product.price_currency);
+        intervalEl.textContent = product.interval ? `per ${product.interval}` : '';
+        if (product.description) {
+          descEl.textContent = product.description;
+          heroSub.textContent = product.description;
+        } else {
+          descEl.textContent = 'Unlock the full streaming experience with a live OBS overlay.';
+        }
+      } else {
+        priceEl.textContent = '';
+        descEl.textContent = 'Product details unavailable. Please try again later.';
+      }
+
+      // ── CTA button state ───────────────────────────────────────────────
+      const ctaBtn = document.getElementById('cta-btn');
+      const manageBtn = document.getElementById('manage-billing-btn');
+      const isPro = me && me.sub_status === 'active';
+
+      if (!me) {
+        // Not logged in
+        ctaBtn.textContent = 'Sign In to Subscribe';
+        ctaBtn.disabled = false;
+        ctaBtn.addEventListener('click', () => {
+          window.location.href = '/login.html';
+        });
+      } else if (isPro) {
+        // Already Pro
+        ctaBtn.textContent = "You're on Pro";
+        ctaBtn.disabled = true;
+        manageBtn.style.display = '';
+        manageBtn.addEventListener('click', async () => {
+          try {
+            const res = await fetch('/api/billing-portal', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+            });
+            const data = await res.json();
+            if (data.url) window.location.href = data.url;
+            else showToast(data.error || 'Could not open billing portal.');
+          } catch { showToast('Failed to open billing portal.'); }
+        });
+      } else {
+        // Free user — subscribe
+        ctaBtn.textContent = 'Subscribe Now';
+        ctaBtn.disabled = false;
+        ctaBtn.addEventListener('click', async () => {
+          ctaBtn.disabled = true;
+          ctaBtn.textContent = 'Redirecting...';
+          try {
+            const res = await fetch('/api/subscribe', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+            });
+            const data = await res.json();
+            if (data.url) {
+              window.location.href = data.url;
+            } else {
+              showToast(data.error || 'Something went wrong.');
+              ctaBtn.disabled = false;
+              ctaBtn.textContent = 'Subscribe Now';
+            }
+          } catch {
+            showToast('Failed to start checkout.');
+            ctaBtn.disabled = false;
+            ctaBtn.textContent = 'Subscribe Now';
+          }
+        });
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>

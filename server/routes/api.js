@@ -13,11 +13,59 @@ function safeError(err) {
   return isProduction ? 'Internal server error.' : err.message;
 }
 
+// ── Pro check middleware ─────────────────────────────────────────────────────
+async function requirePro(req, res, next) {
+  try {
+    const { rows } = await pool.query(
+      "SELECT status FROM subscriptions WHERE user_id = $1 AND status = 'active'",
+      [req.user.id]
+    );
+    if (!rows.length) return res.status(403).json({ error: 'Pro subscription required.' });
+    next();
+  } catch (err) {
+    res.status(500).json({ error: safeError(err) });
+  }
+}
+
+// ── Pro product cache ────────────────────────────────────────────────────────
+let proProductCache = null;
+let proProductCacheAt = 0;
+const PRO_PRODUCT_TTL = 5 * 60 * 1000; // 5 minutes
+
 // ── Public ──────────────────────────────────────────────────────────────────
 
 /** Returns which auth methods are available */
 router.get('/auth-config', (_req, res) => {
   res.json({ googleEnabled: !!process.env.GOOGLE_CLIENT_ID, localEnabled: true });
+});
+
+/** Public: Stripe product info for the Pro plan */
+router.get('/pro-product', async (_req, res) => {
+  if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_PRICE_ID) {
+    return res.status(503).json({ error: 'Payments not configured.' });
+  }
+  // Return cached if fresh
+  if (proProductCache && Date.now() - proProductCacheAt < PRO_PRODUCT_TTL) {
+    return res.json(proProductCache);
+  }
+  try {
+    const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+    const price = await stripe.prices.retrieve(process.env.STRIPE_PRICE_ID, {
+      expand: ['product'],
+    });
+    const product = price.product;
+    proProductCache = {
+      name: product.name,
+      description: product.description || '',
+      price_amount: price.unit_amount,
+      price_currency: price.currency,
+      interval: price.recurring?.interval || null,
+    };
+    proProductCacheAt = Date.now();
+    res.json(proProductCache);
+  } catch (err) {
+    res.status(500).json({ error: safeError(err) });
+  }
 });
 
 /** Site-wide stats (player count, etc.) */
@@ -111,7 +159,7 @@ router.get('/me', requireAuth, async (req, res) => {
   }
 });
 
-router.put('/me/mcsr-username', requireAuth, async (req, res) => {
+router.put('/me/mcsr-username', requireAuth, requirePro, async (req, res) => {
   const { mcsr_username } = req.body ?? {};
   if (!mcsr_username || !/^[a-zA-Z0-9_]{1,16}$/.test(mcsr_username)) {
     return res.status(400).json({ error: 'Invalid username (1–16 alphanumeric/underscore chars).' });
@@ -124,7 +172,7 @@ router.put('/me/mcsr-username', requireAuth, async (req, res) => {
   }
 });
 
-router.post('/me/regen-widget-token', requireAuth, async (req, res) => {
+router.post('/me/regen-widget-token', requireAuth, requirePro, async (req, res) => {
   try {
     const { rows } = await pool.query(
       'UPDATE users SET widget_token=gen_random_uuid() WHERE id=$1 RETURNING widget_token',

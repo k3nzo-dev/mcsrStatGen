@@ -461,8 +461,8 @@
       </div>
     </div>
 
-    <!-- Widget card -->
-    <div class="db-card">
+    <!-- Widget card — Pro users -->
+    <div class="db-card" id="widget-card-pro" style="display:none">
       <div class="db-card-title">
         <span class="db-card-title-icon">📡</span>
         Your OBS Widget
@@ -486,6 +486,39 @@
       <div class="widget-actions">
         <button class="btn btn-green" id="copy-widget-url-btn" disabled>Copy URL</button>
         <button class="btn-danger" id="regen-token-btn">Regenerate Token</button>
+      </div>
+    </div>
+
+    <!-- Widget card — Free users (locked preview) -->
+    <div class="db-card" id="widget-card-free">
+      <div class="db-card-title">
+        <span class="db-card-title-icon">📡</span>
+        Your OBS Widget
+        <span style="margin-left:auto;font-size:0.72rem;font-weight:700;color:#f59e0b;background:#fffbeb;border:1px solid #fde68a;padding:3px 10px;border-radius:100px;text-transform:uppercase;letter-spacing:0.5px">Pro</span>
+      </div>
+      <div style="position:relative;border-radius:var(--radius-md);overflow:hidden;margin-bottom:20px">
+        <div style="filter:blur(3px);opacity:0.5;pointer-events:none;user-select:none">
+          <div class="form-group" style="margin-bottom:0">
+            <label>MCSR Username</label>
+            <div class="form-row">
+              <input type="text" value="MoleyG" disabled style="flex:1;padding:11px 16px;border:1.5px solid var(--border);border-radius:var(--radius-md);font-size:0.92rem;font-family:var(--font);color:var(--text);background:#f8f9fb">
+              <button class="btn btn-green" disabled style="padding:0 24px;white-space:nowrap">Save</button>
+            </div>
+          </div>
+          <p style="font-size:0.8rem;color:var(--muted);margin:18px 0 4px">Widget URL — paste into OBS Browser Source:</p>
+          <div class="widget-url-box">https://mcsrstats.example/widget/MoleyG?token=abc123...</div>
+          <div class="widget-actions">
+            <button class="btn btn-green" disabled>Copy URL</button>
+            <button class="btn-danger" disabled>Regenerate Token</button>
+          </div>
+        </div>
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.4);backdrop-filter:blur(2px);border-radius:var(--radius-md)">
+          <div style="text-align:center">
+            <div style="font-size:1.6rem;margin-bottom:8px">🔒</div>
+            <p style="font-size:0.95rem;font-weight:700;color:var(--text);margin-bottom:12px">Upgrade to Pro to unlock</p>
+            <a href="/upgrade.html" class="btn btn-green btn-sm">Upgrade to Pro</a>
+          </div>
+        </div>
       </div>
     </div>
 
