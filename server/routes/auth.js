@@ -5,6 +5,13 @@ const { pool } = require('../db');
 
 const router = express.Router();
 
+const isProduction = process.env.NODE_ENV === 'production'
+                  || !!process.env.RAILWAY_ENVIRONMENT;
+
+function safeError(err) {
+  return isProduction ? 'Internal server error.' : err.message;
+}
+
 // ── Middleware ──────────────────────────────────────────────────────────────
 
 function requireAuth(req, res, next) {
@@ -13,6 +20,19 @@ function requireAuth(req, res, next) {
   const wantsJson = (req.headers.accept || '').includes('application/json');
   if (wantsJson) return res.status(401).json({ error: 'Unauthorized' });
   res.redirect('/login.html');
+}
+
+async function requirePro(req, res, next) {
+  try {
+    const { rows } = await pool.query(
+      "SELECT status FROM subscriptions WHERE user_id = $1 AND status = 'active'",
+      [req.user.id]
+    );
+    if (rows.length) return next();
+    res.status(403).json({ error: 'Pro subscription required.' });
+  } catch {
+    res.status(500).json({ error: 'Could not verify subscription.' });
+  }
 }
 
 // ── Local auth routes ────────────────────────────────────────────────────────
@@ -40,20 +60,20 @@ router.post('/register', async (req, res) => {
       [normalized, hash]
     );
     req.login(rows[0], err => {
-      if (err) return res.status(500).json({ error: err.message });
+      if (err) return res.status(500).json({ error: safeError(err) });
       res.json({ ok: true });
     });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
 router.post('/login', (req, res, next) => {
   passport.authenticate('local', (err, user, info) => {
-    if (err) return res.status(500).json({ error: err.message });
+    if (err) return res.status(500).json({ error: safeError(err) });
     if (!user) return res.status(401).json({ error: info?.message ?? 'Invalid credentials.' });
     req.login(user, loginErr => {
-      if (loginErr) return res.status(500).json({ error: loginErr.message });
+      if (loginErr) return res.status(500).json({ error: safeError(loginErr) });
       res.json({ ok: true });
     });
   })(req, res, next);
@@ -72,7 +92,7 @@ if (process.env.GOOGLE_CLIENT_ID) {
 
 // ── Dev login (disabled in production) ─────────────────────────────────────
 
-if (process.env.NODE_ENV !== 'production') {
+if (!isProduction) {
   router.post('/dev-login', async (req, res) => {
     try {
       const { rows } = await pool.query(
@@ -83,11 +103,11 @@ if (process.env.NODE_ENV !== 'production') {
          RETURNING *`
       );
       req.login(rows[0], err => {
-        if (err) return res.status(500).json({ error: err.message });
+        if (err) return res.status(500).json({ error: safeError(err) });
         res.json({ ok: true });
       });
     } catch (err) {
-      res.status(500).json({ error: err.message });
+      res.status(500).json({ error: safeError(err) });
     }
   });
 }
@@ -98,4 +118,4 @@ router.post('/logout', (req, res) => {
   req.logout(() => res.redirect('/login.html'));
 });
 
-module.exports = { router, requireAuth };
+module.exports = { router, requireAuth, requirePro };

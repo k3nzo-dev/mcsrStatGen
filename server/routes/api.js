@@ -1,9 +1,17 @@
 const express        = require('express');
 const { v4: uuidv4 } = require('uuid');
+const rateLimit      = require('express-rate-limit');
 const { pool }       = require('../db');
 const { requireAuth } = require('./auth');
 
 const router = express.Router();
+
+const isProduction = process.env.NODE_ENV === 'production'
+                  || !!process.env.RAILWAY_ENVIRONMENT;
+
+function safeError(err) {
+  return isProduction ? 'Internal server error.' : err.message;
+}
 
 // ── Public ──────────────────────────────────────────────────────────────────
 
@@ -40,7 +48,12 @@ router.post('/track-player', async (req, res) => {
 });
 
 /** Public: verify widget token */
-router.get('/widget-verify', async (req, res) => {
+const widgetLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 60,
+  message: { error: 'Too many requests.' },
+});
+router.get('/widget-verify', widgetLimiter, async (req, res) => {
   const { token } = req.query;
   if (!token) return res.status(400).json({ error: 'token required' });
   try {
@@ -51,7 +64,7 @@ router.get('/widget-verify', async (req, res) => {
     if (!rows.length) return res.status(404).json({ error: 'Invalid token.' });
     res.json({ valid: true, poll_interval: 30 });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
@@ -65,7 +78,7 @@ router.get('/overlay/:token', async (req, res) => {
     if (!rows.length) return res.status(404).json({ error: 'Not found' });
     res.json(rows[0]);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
@@ -84,7 +97,7 @@ router.get('/me', requireAuth, async (req, res) => {
     );
     res.json(rows[0]);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
@@ -97,7 +110,7 @@ router.put('/me/mcsr-username', requireAuth, async (req, res) => {
     await pool.query('UPDATE users SET mcsr_username=$1 WHERE id=$2', [mcsr_username, req.user.id]);
     res.json({ ok: true });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
@@ -109,7 +122,7 @@ router.post('/me/regen-widget-token', requireAuth, async (req, res) => {
     );
     res.json({ widget_token: rows[0].widget_token });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
@@ -121,7 +134,7 @@ router.get('/overlay-configs', requireAuth, async (req, res) => {
     );
     res.json(rows);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
@@ -137,7 +150,7 @@ router.post('/overlay-configs', requireAuth, async (req, res) => {
     );
     res.status(201).json(rows[0]);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
@@ -156,7 +169,7 @@ router.put('/overlay-configs/:id', requireAuth, async (req, res) => {
     if (!rows.length) return res.status(404).json({ error: 'Not found' });
     res.json(rows[0]);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
@@ -169,16 +182,99 @@ router.delete('/overlay-configs/:id', requireAuth, async (req, res) => {
     if (!rowCount) return res.status(404).json({ error: 'Not found' });
     res.json({ ok: true });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
-router.post('/subscribe', requireAuth, (_req, res) => {
+// ── Billing rate limiter ─────────────────────────────────────────────────────
+const billingLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many billing requests. Try again later.' },
+});
+
+router.post('/subscribe', requireAuth, billingLimiter, async (req, res) => {
+  if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_PRICE_ID) {
+    return res.status(503).json({ error: 'Payments not yet enabled.' });
+  }
+  try {
+    // Reject if already active
+    const { rows: subRows } = await pool.query(
+      "SELECT status FROM subscriptions WHERE user_id = $1 AND status = 'active'",
+      [req.user.id]
+    );
+    if (subRows.length) {
+      return res.status(400).json({ error: 'You already have an active subscription.' });
+    }
+
+    const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+
+    // Find or create Stripe customer
+    let { rows: userRows } = await pool.query(
+      'SELECT s.stripe_customer_id, u.username, u.email FROM users u LEFT JOIN subscriptions s ON s.user_id = u.id WHERE u.id = $1',
+      [req.user.id]
+    );
+    const user = userRows[0];
+    let customerId = user?.stripe_customer_id;
+
+    if (!customerId) {
+      const customer = await stripe.customers.create({
+        email: user?.email || undefined,
+        metadata: { user_id: String(req.user.id), username: user?.username || '' },
+      });
+      customerId = customer.id;
+      // Upsert subscription row with customer ID
+      await pool.query(
+        `INSERT INTO subscriptions (user_id, stripe_customer_id, status)
+         VALUES ($1, $2, 'free')
+         ON CONFLICT (user_id) DO UPDATE SET stripe_customer_id = $2`,
+        [req.user.id, customerId]
+      );
+    }
+
+    const origin = `${req.protocol}://${req.get('host')}`;
+    const session = await stripe.checkout.sessions.create({
+      customer: customerId,
+      mode: 'subscription',
+      line_items: [{ price: process.env.STRIPE_PRICE_ID, quantity: 1 }],
+      success_url: `${origin}/dashboard.html?upgraded=1`,
+      cancel_url:  `${origin}/dashboard.html`,
+      metadata: { user_id: String(req.user.id) },
+    });
+
+    res.json({ url: session.url });
+  } catch (err) {
+    res.status(500).json({ error: safeError(err) });
+  }
+});
+
+router.post('/billing-portal', requireAuth, billingLimiter, async (req, res) => {
   if (!process.env.STRIPE_SECRET_KEY) {
     return res.status(503).json({ error: 'Payments not yet enabled.' });
   }
-  // TODO: create Stripe checkout session
-  res.status(501).json({ error: 'Not implemented.' });
+  try {
+    const { rows } = await pool.query(
+      'SELECT stripe_customer_id FROM subscriptions WHERE user_id = $1',
+      [req.user.id]
+    );
+    const customerId = rows[0]?.stripe_customer_id;
+    if (!customerId) {
+      return res.status(400).json({ error: 'No billing account found.' });
+    }
+
+    const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+    const origin = `${req.protocol}://${req.get('host')}`;
+    const portalSession = await stripe.billingPortal.sessions.create({
+      customer:   customerId,
+      return_url: `${origin}/dashboard.html`,
+    });
+
+    res.json({ url: portalSession.url });
+  } catch (err) {
+    res.status(500).json({ error: safeError(err) });
+  }
 });
 
 module.exports = router;

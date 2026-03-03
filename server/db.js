@@ -44,6 +44,11 @@ async function initSchema() {
   `);
 
   await pool.query(`
+    CREATE UNIQUE INDEX IF NOT EXISTS subscriptions_user_id_unique
+      ON subscriptions (user_id);
+  `);
+
+  await pool.query(`
     CREATE TABLE IF NOT EXISTS tracked_players (
       username     TEXT PRIMARY KEY,
       first_seen   TIMESTAMPTZ DEFAULT NOW(),
