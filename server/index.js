@@ -12,6 +12,9 @@ const apiRouter  = require('./routes/api');
 const app  = express();
 const PORT = process.env.PORT || 3000;
 
+// Trust Railway's reverse proxy so secure cookies work over HTTPS
+if (process.env.NODE_ENV === 'production') app.set('trust proxy', 1);
+
 // ── Stripe webhook (needs raw body — must come before express.json()) ────────
 app.post('/webhooks/stripe', express.raw({ type: 'application/json' }), (_req, res) => {
   // TODO: verify STRIPE_WEBHOOK_SECRET and handle events
