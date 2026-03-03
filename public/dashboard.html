@@ -241,117 +241,33 @@
       box-shadow: 0 0 0 3px rgba(58,125,68,0.12);
     }
 
-    .radio-group { display: flex; gap: 10px; flex-wrap: wrap; }
-    .radio-pill {
-      position: relative;
-    }
-    .radio-pill input { position: absolute; opacity: 0; width: 0; height: 0; }
-    .radio-pill label {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 8px 18px;
-      border: 1.5px solid var(--border);
-      border-radius: 100px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: var(--muted);
-      cursor: pointer;
-      transition: border-color 0.15s, color 0.15s, background 0.15s;
-      user-select: none;
-      text-transform: none;
-      letter-spacing: 0;
-    }
-    .radio-pill input:checked + label {
-      border-color: var(--green);
-      color: var(--green);
-      background: var(--green-muted);
-    }
-
-    .slider-wrap { display: flex; align-items: center; gap: 14px; }
-    .slider-wrap input[type="range"] {
-      flex: 1;
-      accent-color: var(--green);
-      height: 4px;
-      cursor: pointer;
-    }
-    .slider-val {
-      font-size: 0.85rem;
-      font-weight: 700;
-      color: var(--green);
-      min-width: 36px;
-      text-align: right;
-    }
-
-    #form-error {
-      color: #dc2626;
-      font-size: 0.82rem;
-      margin-top: 10px;
-      min-height: 18px;
-    }
-
-    /* ── Overlay list ────────────────────────────────────────────────────────── */
-    .overlay-list { list-style: none; display: flex; flex-direction: column; gap: 14px; }
-    .overlay-empty {
-      text-align: center;
-      padding: 32px 0;
-      color: var(--muted);
-      font-size: 0.9rem;
-    }
-    .overlay-empty-icon { font-size: 2rem; margin-bottom: 10px; opacity: 0.4; }
-
-    .overlay-item {
-      border: 1.5px solid var(--border);
-      border-radius: var(--radius-md);
-      padding: 18px 20px;
-      transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
-      animation: overlayItemIn 0.35s ease both;
-    }
-    .overlay-item:hover {
-      border-color: rgba(58,125,68,0.35);
-      box-shadow: var(--shadow-sm);
-      transform: translateY(-2px);
-    }
-    .overlay-item-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 8px;
-      margin-bottom: 6px;
-    }
-    .overlay-item-name {
-      font-weight: 700;
-      font-size: 0.98rem;
-      color: var(--text);
-    }
-    .overlay-item-meta {
-      font-size: 0.78rem;
-      color: var(--muted);
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-    .overlay-meta-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      background: #f1f5f9;
-      padding: 2px 9px;
-      border-radius: 100px;
-      font-weight: 600;
-    }
-    .overlay-url {
-      margin: 12px 0 14px;
+    /* ── Widget card ─────────────────────────────────────────────────────────── */
+    .widget-url-box {
       background: #f8f9fb;
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
-      padding: 9px 14px;
+      padding: 10px 14px;
       font-family: monospace;
       font-size: 0.78rem;
       word-break: break-all;
       color: var(--muted);
+      margin: 12px 0 16px;
+      min-height: 36px;
     }
-    .overlay-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .widget-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .btn-danger {
+      background: transparent;
+      border: 1.5px solid #dc2626;
+      color: #dc2626;
+      border-radius: var(--radius-lg);
+      padding: 9px 18px;
+      font-size: 0.85rem;
+      font-family: var(--font);
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .btn-danger:hover { background: #fff0f0; }
 
     /* ── Toast ───────────────────────────────────────────────────────────────── */
     .toast {
@@ -434,54 +350,30 @@
       </div>
     </div>
 
-    <!-- Create overlay -->
-    <div class="db-card">
-      <div class="db-card-title">
-        <span class="db-card-title-icon">＋</span>
-        Create Overlay
-      </div>
-      <form id="create-form">
-        <div class="form-group">
-          <label for="overlay-username">MCSR Username</label>
-          <input type="text" id="overlay-username" placeholder="e.g. Feinberg" maxlength="16" autocomplete="off">
-        </div>
-        <div class="form-group">
-          <label>Style</label>
-          <div class="radio-group">
-            <div class="radio-pill">
-              <input type="radio" name="style" id="style-card" value="card" checked>
-              <label for="style-card">🃏 Card</label>
-            </div>
-            <div class="radio-pill">
-              <input type="radio" name="style" id="style-hud" value="hud">
-              <label for="style-hud">🖥 HUD</label>
-            </div>
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Poll Interval — <span id="interval-label">30s</span></label>
-          <div class="slider-wrap">
-            <input type="range" id="interval-slider" min="10" max="120" step="5" value="30">
-            <span class="slider-val" id="interval-val">30s</span>
-          </div>
-        </div>
-        <div id="form-error"></div>
-        <button type="submit" class="btn btn-green">Create Overlay</button>
-      </form>
-    </div>
-
-    <!-- Overlay list -->
+    <!-- Widget card -->
     <div class="db-card">
       <div class="db-card-title">
         <span class="db-card-title-icon">📡</span>
-        Your Overlays
+        Your OBS Widget
       </div>
-      <ul class="overlay-list" id="overlay-list">
-        <li class="overlay-empty">
-          <div class="overlay-empty-icon">📡</div>
-          Loading…
-        </li>
-      </ul>
+      <div class="form-group" style="display:flex;gap:10px;align-items:flex-end;margin-bottom:0">
+        <div style="flex:1">
+          <label for="widget-username">MCSR Username</label>
+          <input type="text" id="widget-username" placeholder="e.g. MoleyG" maxlength="16" autocomplete="off">
+        </div>
+        <button class="btn btn-green" id="save-username-btn" style="margin-bottom:1px">Save</button>
+      </div>
+      <div id="save-username-error" style="color:#dc2626;font-size:0.82rem;min-height:18px;margin-top:6px"></div>
+
+      <p style="font-size:0.8rem;color:var(--muted);margin:18px 0 4px">
+        Widget URL — paste into OBS Browser Source (1100&times;350 px, transparent bg):
+      </p>
+      <div class="widget-url-box" id="widget-url-display">Enter your MCSR username above to generate your URL.</div>
+
+      <div class="widget-actions">
+        <button class="btn btn-green" id="copy-widget-url-btn" disabled>Copy URL</button>
+        <button class="btn-danger" id="regen-token-btn">Regenerate Token</button>
+      </div>
     </div>
 
   </main>
@@ -510,6 +402,15 @@
       if (res.status === 401) { window.location.href = '/login.html'; throw new Error('Unauthorized'); }
       return res.json();
     }
+    async function apiPut(path, body) {
+      const res = await fetch(path, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify(body),
+      });
+      if (res.status === 401) { window.location.href = '/login.html'; throw new Error('Unauthorized'); }
+      return res.json();
+    }
     async function apiPost(path, body) {
       const res = await fetch(path, {
         method: 'POST',
@@ -519,83 +420,65 @@
       if (res.status === 401) { window.location.href = '/login.html'; throw new Error('Unauthorized'); }
       return res.json();
     }
-    async function apiDelete(path) {
-      const res = await fetch(path, { method: 'DELETE', headers: { Accept: 'application/json' } });
-      if (res.status === 401) { window.location.href = '/login.html'; throw new Error('Unauthorized'); }
-      return res.json();
+
+    // ── Widget URL ───────────────────────────────────────────────────────────
+    let currentWidgetToken = null;
+
+    function widgetUrl(username, token) {
+      if (!username || !token) return '';
+      return `${window.location.origin}/widget/${encodeURIComponent(username)}?token=${token}`;
     }
 
-    // ── Overlay URL ──────────────────────────────────────────────────────────
-    function overlayUrl(token) {
-      return `${window.location.origin}/overlay.html?token=${token}`;
-    }
-
-    // ── Render overlay list ──────────────────────────────────────────────────
-    function renderOverlayList(configs) {
-      const list = document.getElementById('overlay-list');
-      if (!configs.length) {
-        list.innerHTML = `
-          <li class="overlay-empty">
-            <div class="overlay-empty-icon">📡</div>
-            No overlays yet — create one above.
-          </li>`;
-        return;
+    function updateWidgetUrlDisplay() {
+      const username = document.getElementById('widget-username').value.trim();
+      const urlDisplay = document.getElementById('widget-url-display');
+      const copyBtn   = document.getElementById('copy-widget-url-btn');
+      const url = widgetUrl(username, currentWidgetToken);
+      if (url) {
+        urlDisplay.textContent = url;
+        copyBtn.disabled = false;
+      } else {
+        urlDisplay.textContent = 'Enter your MCSR username above to generate your URL.';
+        copyBtn.disabled = true;
       }
-      list.innerHTML = '';
-      configs.forEach((cfg, i) => {
-        const url = overlayUrl(cfg.overlay_token);
-        const li = document.createElement('li');
-        li.className = 'overlay-item';
-        li.style.animationDelay = (i * 0.07) + 's';
-        li.dataset.id = cfg.id;
-        li.innerHTML = `
-          <div class="overlay-item-header">
-            <span class="overlay-item-name">${escapeHtml(cfg.mcsr_username)}</span>
-          </div>
-          <div class="overlay-item-meta">
-            <span class="overlay-meta-pill">🃏 ${escapeHtml(cfg.style)}</span>
-            <span class="overlay-meta-pill">⏱ ${cfg.poll_interval}s</span>
-          </div>
-          <div class="overlay-url">${escapeHtml(url)}</div>
-          <div class="overlay-actions">
-            <button class="btn btn-sm btn-green copy-btn" data-url="${escapeHtml(url)}">Copy URL</button>
-            <button class="btn btn-sm delete-btn"
-              style="background:transparent;border:1.5px solid #dc2626;color:#dc2626;border-radius:var(--radius-lg);"
-              data-id="${cfg.id}">Delete</button>
-          </div>`;
-        list.appendChild(li);
-      });
-
-      list.querySelectorAll('.copy-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          navigator.clipboard.writeText(btn.dataset.url).then(() => showToast('URL copied!'));
-        });
-      });
-      list.querySelectorAll('.delete-btn').forEach(btn => {
-        btn.addEventListener('click', async () => {
-          if (!confirm('Delete this overlay?')) return;
-          const item = btn.closest('.overlay-item');
-          item.style.transition = 'opacity 0.2s, transform 0.2s';
-          item.style.opacity = '0';
-          item.style.transform = 'scale(0.97)';
-          try {
-            await apiDelete(`/api/overlay-configs/${btn.dataset.id}`);
-            setTimeout(loadConfigs, 220);
-          } catch (err) {
-            item.style.opacity = '1';
-            item.style.transform = '';
-            showToast('Delete failed: ' + err.message);
-          }
-        });
-      });
     }
 
-    async function loadConfigs() {
+    document.getElementById('widget-username').addEventListener('input', updateWidgetUrlDisplay);
+
+    // ── Save MCSR username ───────────────────────────────────────────────────
+    document.getElementById('save-username-btn').addEventListener('click', async () => {
+      const errEl = document.getElementById('save-username-error');
+      errEl.textContent = '';
+      const username = document.getElementById('widget-username').value.trim();
+      if (!username) { errEl.textContent = 'Please enter a username.'; return; }
       try {
-        const configs = await apiGet('/api/overlay-configs');
-        renderOverlayList(configs);
-      } catch { /* already redirected */ }
-    }
+        const data = await apiPut('/api/me/mcsr-username', { mcsr_username: username });
+        if (data.error) { errEl.textContent = data.error; return; }
+        showToast('Username saved!');
+      } catch (err) {
+        errEl.textContent = 'Failed: ' + err.message;
+      }
+    });
+
+    // ── Copy widget URL ──────────────────────────────────────────────────────
+    document.getElementById('copy-widget-url-btn').addEventListener('click', () => {
+      const url = document.getElementById('widget-url-display').textContent;
+      navigator.clipboard.writeText(url).then(() => showToast('URL copied!'));
+    });
+
+    // ── Regenerate token ─────────────────────────────────────────────────────
+    document.getElementById('regen-token-btn').addEventListener('click', async () => {
+      if (!confirm('Regenerate your widget token? This will break any existing OBS Browser Source links.')) return;
+      try {
+        const data = await apiPost('/api/me/regen-widget-token', {});
+        if (data.error) { showToast('Error: ' + data.error); return; }
+        currentWidgetToken = data.widget_token;
+        updateWidgetUrlDisplay();
+        showToast('Token regenerated — update your OBS source.');
+      } catch (err) {
+        showToast('Failed: ' + err.message);
+      }
+    });
 
     // ── Init ─────────────────────────────────────────────────────────────────
     async function init() {
@@ -607,54 +490,19 @@
         const isPro = me.sub_status && me.sub_status !== 'free';
         document.getElementById('plan-name').textContent = isPro ? 'Pro' : 'Free';
         document.getElementById('db-plan-badge').textContent = isPro ? '✦ Pro Plan' : '✦ Free Plan';
+
+        // Populate widget fields
+        currentWidgetToken = me.widget_token || null;
+        if (me.mcsr_username) {
+          document.getElementById('widget-username').value = me.mcsr_username;
+        }
+        updateWidgetUrlDisplay();
       } catch { return; }
-      await loadConfigs();
     }
 
     // ── Upgrade button ───────────────────────────────────────────────────────
     document.getElementById('upgrade-btn').addEventListener('click', () => {
       showToast('Payments coming soon!');
-    });
-
-    // ── Interval slider ──────────────────────────────────────────────────────
-    const slider = document.getElementById('interval-slider');
-    const intervalVal = document.getElementById('interval-val');
-    const intervalLabel = document.getElementById('interval-label');
-    slider.addEventListener('input', () => {
-      const v = slider.value + 's';
-      intervalVal.textContent = v;
-      intervalLabel.textContent = v;
-    });
-
-    // ── Create form ──────────────────────────────────────────────────────────
-    document.getElementById('create-form').addEventListener('submit', async e => {
-      e.preventDefault();
-      const errEl = document.getElementById('form-error');
-      errEl.textContent = '';
-      const submitBtn = e.target.querySelector('[type="submit"]');
-
-      const username = document.getElementById('overlay-username').value.trim();
-      const validationError = validateUsername(username);
-      if (validationError) { errEl.textContent = validationError; return; }
-
-      const style = document.querySelector('input[name="style"]:checked').value;
-      const poll_interval = parseInt(slider.value, 10);
-
-      submitBtn.disabled = true;
-      try {
-        const cfg = await apiPost('/api/overlay-configs', { mcsr_username: username, style, poll_interval });
-        if (cfg.error) { errEl.textContent = cfg.error; return; }
-        document.getElementById('overlay-username').value = '';
-        slider.value = 30;
-        intervalVal.textContent = '30s';
-        intervalLabel.textContent = '30s';
-        await loadConfigs();
-        showToast('Overlay created!');
-      } catch (err) {
-        errEl.textContent = 'Failed: ' + err.message;
-      } finally {
-        submitBtn.disabled = false;
-      }
     });
 
     init();

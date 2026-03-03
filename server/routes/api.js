@@ -39,6 +39,22 @@ router.post('/track-player', async (req, res) => {
   res.sendStatus(204);
 });
 
+/** Public: verify widget token */
+router.get('/widget-verify', async (req, res) => {
+  const { token } = req.query;
+  if (!token) return res.status(400).json({ error: 'token required' });
+  try {
+    const { rows } = await pool.query(
+      'SELECT id FROM users WHERE widget_token=$1',
+      [token]
+    );
+    if (!rows.length) return res.status(404).json({ error: 'Invalid token.' });
+    res.json({ valid: true, poll_interval: 30 });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 /** Public: resolve overlay token → config */
 router.get('/overlay/:token', async (req, res) => {
   try {
@@ -58,13 +74,40 @@ router.get('/overlay/:token', async (req, res) => {
 router.get('/me', requireAuth, async (req, res) => {
   try {
     const { rows } = await pool.query(
-      `SELECT u.*, s.status AS sub_status, s.current_period_end
+      `SELECT u.id, u.google_id, u.email, u.display_name, u.avatar_url, u.created_at,
+              u.username, u.widget_token, u.mcsr_username,
+              s.status AS sub_status, s.current_period_end
        FROM users u
        LEFT JOIN subscriptions s ON s.user_id = u.id
        WHERE u.id = $1`,
       [req.user.id]
     );
     res.json(rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.put('/me/mcsr-username', requireAuth, async (req, res) => {
+  const { mcsr_username } = req.body ?? {};
+  if (!mcsr_username || !/^[a-zA-Z0-9_]{1,16}$/.test(mcsr_username)) {
+    return res.status(400).json({ error: 'Invalid username (1–16 alphanumeric/underscore chars).' });
+  }
+  try {
+    await pool.query('UPDATE users SET mcsr_username=$1 WHERE id=$2', [mcsr_username, req.user.id]);
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post('/me/regen-widget-token', requireAuth, async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      'UPDATE users SET widget_token=gen_random_uuid() WHERE id=$1 RETURNING widget_token',
+      [req.user.id]
+    );
+    res.json({ widget_token: rows[0].widget_token });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

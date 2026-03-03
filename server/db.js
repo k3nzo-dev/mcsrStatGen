@@ -39,6 +39,11 @@ async function initSchema() {
   `);
 
   await pool.query(`
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS widget_token  UUID UNIQUE DEFAULT gen_random_uuid();
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS mcsr_username TEXT;
+  `);
+
+  await pool.query(`
     CREATE TABLE IF NOT EXISTS tracked_players (
       username     TEXT PRIMARY KEY,
       first_seen   TIMESTAMPTZ DEFAULT NOW(),

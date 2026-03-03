@@ -44,6 +44,11 @@ app.use(passport.session());
 app.use('/auth', authRouter);
 app.use('/api',  apiRouter);
 
+// ── Widget route ──────────────────────────────────────────────────────────────
+app.get('/widget/:username', (_req, res) =>
+  res.sendFile(path.join(__dirname, '../public/widget.html'))
+);
+
 // ── Static files ──────────────────────────────────────────────────────────────
 app.use(express.static(path.join(__dirname, '../public')));
 
