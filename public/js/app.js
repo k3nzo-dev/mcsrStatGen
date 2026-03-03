@@ -24,6 +24,8 @@ fetch('/api/me', { headers: { Accept: 'application/json' } })
     btn.href = '/dashboard.html';
     btn.style.borderColor = 'var(--green)';
     btn.style.color = 'var(--green)';
+    const logoutForm = document.getElementById('nav-logout-form');
+    if (logoutForm) logoutForm.style.display = '';
   })
   .catch(() => { });
 

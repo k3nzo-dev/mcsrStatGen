@@ -141,7 +141,7 @@ app.use('/auth/register', authLimiter);
 app.use((req, res, next) => {
   if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(req.method)) {
     // Exclude Stripe webhooks since they come from Stripe, not a browser
-    if (req.path === '/webhooks/stripe') return next();
+    if (req.path === '/webhooks/stripe' || req.path === '/auth/logout') return next();
 
     const requestedWith = req.get('X-Requested-With');
     if (requestedWith !== 'XMLHttpRequest') {

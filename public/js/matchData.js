@@ -12,7 +12,7 @@ function didPlayerWin(match, playerUuid) {
  * Returns true when the match set is large enough for reliable stats.
  */
 function hasEnoughData(matches) {
-    return matches.length >= 10;
+    return matches.length >= 5;
 }
 
 // ── Shared bucketing helper ─────────────────────────────────────────────────
