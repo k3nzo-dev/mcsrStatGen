@@ -1,22 +1,22 @@
 require('dotenv').config();
 
-const express    = require('express');
-const path       = require('path');
-const session    = require('express-session');
-const PgSession  = require('connect-pg-simple')(session);
-const helmet     = require('helmet');
-const rateLimit  = require('express-rate-limit');
-const passport   = require('./auth');
+const express = require('express');
+const path = require('path');
+const session = require('express-session');
+const PgSession = require('connect-pg-simple')(session);
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const passport = require('./auth');
 const { pool, initSchema } = require('./db');
 const { router: authRouter } = require('./routes/auth');
-const apiRouter  = require('./routes/api');
+const apiRouter = require('./routes/api');
 
-const app  = express();
+const app = express();
 const PORT = process.env.PORT || 3000;
 
 // ── Environment detection ─────────────────────────────────────────────────
 const isProduction = process.env.NODE_ENV === 'production'
-                  || !!process.env.RAILWAY_ENVIRONMENT;
+  || !!process.env.RAILWAY_ENVIRONMENT;
 
 if (isProduction && !process.env.SESSION_SECRET) {
   console.warn('[server] WARNING: SESSION_SECRET not set — using insecure default.');
@@ -32,7 +32,7 @@ app.use(helmet({
 
 // ── Stripe webhook (needs raw body — must come before express.json()) ────────
 app.post('/webhooks/stripe', express.raw({ type: 'application/json' }), (req, res) => {
-  const secret    = process.env.STRIPE_WEBHOOK_SECRET;
+  const secret = process.env.STRIPE_WEBHOOK_SECRET;
   const stripeKey = process.env.STRIPE_SECRET_KEY;
   if (!secret || !stripeKey) return res.sendStatus(200);
 
@@ -53,7 +53,7 @@ app.post('/webhooks/stripe', express.raw({ type: 'application/json' }), (req, re
       switch (event.type) {
         case 'checkout.session.completed': {
           const session = event.data.object;
-          const userId  = Number(session.metadata?.user_id);
+          const userId = Number(session.metadata?.user_id);
           if (!userId) break;
           await pool.query(
             `INSERT INTO subscriptions (user_id, stripe_customer_id, stripe_sub_id, status, current_period_end)
@@ -115,9 +115,9 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure:   isProduction,
+    secure: isProduction,
     httpOnly: true,
-    maxAge:   7 * 24 * 60 * 60 * 1000, // 7 days
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     sameSite: 'lax',
   },
 }));
@@ -134,12 +134,26 @@ const authLimiter = rateLimit({
   legacyHeaders: false,
   message: { error: 'Too many attempts. Try again later.' },
 });
-app.use('/auth/login',    authLimiter);
+app.use('/auth/login', authLimiter);
 app.use('/auth/register', authLimiter);
+
+// ── CSRF Protection ──────────────────────────────────────────────────────────
+app.use((req, res, next) => {
+  if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(req.method)) {
+    // Exclude Stripe webhooks since they come from Stripe, not a browser
+    if (req.path === '/webhooks/stripe') return next();
+
+    const requestedWith = req.get('X-Requested-With');
+    if (requestedWith !== 'XMLHttpRequest') {
+      return res.status(403).json({ error: 'CSRF verification failed' });
+    }
+  }
+  next();
+});
 
 // ── Routers ───────────────────────────────────────────────────────────────────
 app.use('/auth', authRouter);
-app.use('/api',  apiRouter);
+app.use('/api', apiRouter);
 
 // ── Widget route ──────────────────────────────────────────────────────────────
 app.get('/widget/:username', (_req, res) =>

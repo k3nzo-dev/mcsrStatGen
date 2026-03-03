@@ -1,13 +1,13 @@
-const express        = require('express');
+const express = require('express');
 const { v4: uuidv4 } = require('uuid');
-const rateLimit      = require('express-rate-limit');
-const { pool }       = require('../db');
+const rateLimit = require('express-rate-limit');
+const { pool } = require('../db');
 const { requireAuth } = require('./auth');
 
 const router = express.Router();
 
 const isProduction = process.env.NODE_ENV === 'production'
-                  || !!process.env.RAILWAY_ENVIRONMENT;
+  || !!process.env.RAILWAY_ENVIRONMENT;
 
 function safeError(err) {
   return isProduction ? 'Internal server error.' : err.message;
@@ -31,7 +31,12 @@ router.get('/site-stats', async (_req, res) => {
 });
 
 /** Record a player search (upsert — increments count on repeat) */
-router.post('/track-player', async (req, res) => {
+const trackPlayerLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 5,
+  message: { error: 'Too many requests.' },
+});
+router.post('/track-player', trackPlayerLimiter, async (req, res) => {
   const { username } = req.body ?? {};
   if (!username || typeof username !== 'string') return res.sendStatus(204);
   const normalized = username.toLowerCase().trim().slice(0, 40);
@@ -69,7 +74,12 @@ router.get('/widget-verify', widgetLimiter, async (req, res) => {
 });
 
 /** Public: resolve overlay token → config */
-router.get('/overlay/:token', async (req, res) => {
+const overlayLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 60,
+  message: { error: 'Too many requests.' },
+});
+router.get('/overlay/:token', overlayLimiter, async (req, res) => {
   try {
     const { rows } = await pool.query(
       'SELECT mcsr_username, style, poll_interval FROM overlay_configs WHERE overlay_token=$1',
@@ -240,7 +250,7 @@ router.post('/subscribe', requireAuth, billingLimiter, async (req, res) => {
       mode: 'subscription',
       line_items: [{ price: process.env.STRIPE_PRICE_ID, quantity: 1 }],
       success_url: `${origin}/dashboard.html?upgraded=1`,
-      cancel_url:  `${origin}/dashboard.html`,
+      cancel_url: `${origin}/dashboard.html`,
       metadata: { user_id: String(req.user.id) },
     });
 
@@ -267,7 +277,7 @@ router.post('/billing-portal', requireAuth, billingLimiter, async (req, res) => 
     const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
     const origin = `${req.protocol}://${req.get('host')}`;
     const portalSession = await stripe.billingPortal.sessions.create({
-      customer:   customerId,
+      customer: customerId,
       return_url: `${origin}/dashboard.html`,
     });
 

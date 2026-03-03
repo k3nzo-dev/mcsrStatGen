@@ -25,7 +25,7 @@ fetch('/api/me', { headers: { Accept: 'application/json' } })
     btn.style.borderColor = 'var(--green)';
     btn.style.color = 'var(--green)';
   })
-  .catch(() => {});
+  .catch(() => { });
 
 // ── Bootstrap ──────────────────────────────────────────────────────────────
 
@@ -109,9 +109,9 @@ document.addEventListener('DOMContentLoaded', () => {
       // Record this player in the DB (fire-and-forget, non-blocking)
       fetch('/api/track-player', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
         body: JSON.stringify({ username: currentData.nickname }),
-      }).catch(() => {});
+      }).catch(() => { });
       const playerUuid = currentData.uuid;
 
       // 2. Render the base card immediately
