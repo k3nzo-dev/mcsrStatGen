@@ -1,14 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'none';
+    script-src 'self';
+    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+    font-src https://fonts.gstatic.com;
+    img-src 'self' data: https://mc-heads.net;
+    connect-src 'self' https://api.mcsrranked.com https://mc-heads.net;
+  ">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MCSR Ranked Stats — Graphic Generator</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,700&family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,700&family=Press+Start+2P&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
   <!-- ── Navigation ───────────────────────────────────────── -->
@@ -18,7 +30,13 @@
         <span class="brand-icon">⏱</span>
         <span class="brand-name">MCSR Ranked Stats</span>
       </a>
-      <button class="btn btn-green btn-sm" onclick="scrollToGenerator()">Get Started</button>
+      <div style="display:flex;align-items:center;gap:10px">
+        <a href="/login.html" class="btn btn-sm" id="nav-auth-btn"
+           style="border:1.5px solid rgba(255,255,255,0.35);color:inherit;text-decoration:none;padding:7px 16px;border-radius:var(--radius-sm);">
+          Sign In
+        </a>
+        <button class="btn btn-green btn-sm" id="nav-get-started-btn">Get Started</button>
+      </div>
     </div>
   </nav>
 
@@ -43,15 +61,11 @@
       </p>
 
       <div class="hero-buttons">
-        <button class="btn btn-green btn-lg" onclick="scrollToGenerator()">
+        <button class="btn btn-green btn-lg" id="hero-generate-btn">
           Generate My Stats
         </button>
-        <a
-          href="https://mcsrranked.com/leaderboard"
-          target="_blank"
-          rel="noopener"
-          class="btn btn-outline-white btn-lg"
-        >🏆 Leaderboard</a>
+        <a href="https://mcsrranked.com/leaderboard" target="_blank" rel="noopener"
+          class="btn btn-outline-white btn-lg">🏆 Leaderboard</a>
       </div>
 
     </div>
@@ -64,26 +78,26 @@
 
         <div class="stat-card">
           <div class="stat-icon">👥</div>
-          <div class="stat-number">50K+</div>
-          <div class="stat-label">Runners Tracked</div>
+          <div class="stat-number" id="stat-players-tracked">0</div>
+          <div class="stat-label">Players Tracked</div>
         </div>
 
         <div class="stat-card">
-          <div class="stat-icon">🏃</div>
-          <div class="stat-number">2M+</div>
-          <div class="stat-label">Runs Analyzed</div>
+          <div class="stat-icon">🌍</div>
+          <div class="stat-number" id="stat-countries">—</div>
+          <div class="stat-label">Countries</div>
         </div>
 
         <div class="stat-card">
-          <div class="stat-icon">⏱</div>
-          <div class="stat-number">~9:34</div>
-          <div class="stat-label">Avg PB Time</div>
+          <div class="stat-icon">📅</div>
+          <div class="stat-number" id="stat-season">—</div>
+          <div class="stat-label">Current Season</div>
         </div>
 
         <div class="stat-card">
           <div class="stat-icon">🏆</div>
           <div class="stat-number" id="stat-top-elo">—</div>
-          <div class="stat-label">Top Rank ELO</div>
+          <div class="stat-label">Top ELO</div>
         </div>
 
       </div>
@@ -103,16 +117,30 @@
         <div class="search-row">
           <div class="search-input-wrap">
             <span class="search-icon">🔍</span>
-            <input
-              type="text"
-              id="username-input"
-              placeholder="Enter Minecraft username…"
-              autocomplete="off"
-              spellcheck="false"
-            >
+            <input type="text" id="username-input" placeholder="Enter Minecraft username…" autocomplete="off"
+              spellcheck="false">
           </div>
           <button class="btn btn-green btn-lg" id="search-btn">Search Player</button>
         </div>
+      </div>
+
+      <div class="module-toggles" id="module-toggles">
+        <span class="toggles-label">Detailed Stats</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggle-bastion" checked>
+          <span class="toggle-slider"></span>
+          Bastion Breakdown
+        </label>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggle-seed" checked>
+          <span class="toggle-slider"></span>
+          Seed Breakdown
+        </label>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggle-splits">
+          <span class="toggle-slider"></span>
+          Splits
+        </label>
       </div>
 
       <div id="status-area"></div>
@@ -178,7 +206,9 @@
 
   <script src="js/data.js"></script>
   <script src="js/api.js"></script>
+  <script src="js/matchData.js"></script>
   <script src="js/ui.js"></script>
   <script src="js/app.js"></script>
 </body>
+
 </html>

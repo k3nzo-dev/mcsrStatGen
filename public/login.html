@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'none';
+    script-src 'self' 'unsafe-inline';
+    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+    font-src https://fonts.gstatic.com;
+    connect-src 'self';
+  ">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In — MCSR Ranked Stats</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .login-page {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg);
+    }
+    .login-card {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      padding: 48px 40px;
+      width: 100%;
+      max-width: 420px;
+    }
+    .login-brand {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 32px;
+    }
+    .login-brand-icon { font-size: 28px; }
+    .login-brand-name { font-size: 18px; font-weight: 700; color: var(--text); }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      border-bottom: 2px solid var(--border);
+      margin-bottom: 28px;
+    }
+    .tab-btn {
+      flex: 1;
+      background: none;
+      border: none;
+      padding: 10px 0;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .tab-btn.active {
+      color: var(--green);
+      border-bottom-color: var(--green);
+    }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* Form */
+    .form-group { margin-bottom: 18px; }
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      font-family: inherit;
+      background: var(--bg);
+      color: var(--text);
+      box-sizing: border-box;
+      transition: border-color 0.15s;
+    }
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--green);
+    }
+    .submit-btn {
+      width: 100%;
+      padding: 13px 0;
+      background: var(--green);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 6px;
+      transition: opacity 0.15s;
+    }
+    .submit-btn:hover { opacity: 0.88; }
+    .submit-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+    /* Google button */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 24px 0 16px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+    .btn-google {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 12px 24px;
+      background: #4285f4;
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: opacity 0.15s;
+    }
+    .btn-google:hover { opacity: 0.88; }
+
+    .error-msg {
+      color: #dc2626;
+      font-size: 13px;
+      margin-top: 10px;
+      min-height: 20px;
+    }
+    .login-note {
+      margin-top: 24px;
+      font-size: 12px;
+      color: var(--muted);
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-page">
+    <div class="login-card">
+      <div class="login-brand">
+        <span class="login-brand-icon">⏱</span>
+        <span class="login-brand-name">MCSR Ranked Stats</span>
+      </div>
+
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="signin">Sign In</button>
+        <button class="tab-btn" data-tab="register">Register</button>
+      </div>
+
+      <!-- Sign In -->
+      <div class="tab-panel active" id="tab-signin">
+        <form id="signin-form">
+          <div class="form-group">
+            <label for="signin-username">Username</label>
+            <input id="signin-username" name="username" type="text" autocomplete="username" required>
+          </div>
+          <div class="form-group">
+            <label for="signin-password">Password</label>
+            <input id="signin-password" name="password" type="password" autocomplete="current-password" required>
+          </div>
+          <button type="submit" class="submit-btn">Sign In</button>
+          <div class="error-msg" id="signin-error"></div>
+        </form>
+
+        <div id="google-signin-section"></div>
+      </div>
+
+      <!-- Register -->
+      <div class="tab-panel" id="tab-register">
+        <form id="register-form">
+          <div class="form-group">
+            <label for="reg-username">Username</label>
+            <input id="reg-username" name="username" type="text" autocomplete="username" required
+              placeholder="3–20 chars, letters/numbers/_">
+          </div>
+          <div class="form-group">
+            <label for="reg-password">Password</label>
+            <input id="reg-password" name="password" type="password" autocomplete="new-password" required
+              placeholder="Minimum 8 characters">
+          </div>
+          <div class="form-group">
+            <label for="reg-confirm">Confirm Password</label>
+            <input id="reg-confirm" name="confirm" type="password" autocomplete="new-password" required>
+          </div>
+          <button type="submit" class="submit-btn">Create Account</button>
+          <div class="error-msg" id="register-error"></div>
+        </form>
+      </div>
+
+      <p class="login-note">
+        <a href="/" style="color:var(--green)">← Back to stats generator</a>
+      </p>
+    </div>
+  </div>
+
+  <script>
+    // ── Tab switching ────────────────────────────────────────────────────────
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+      });
+    });
+
+    // ── Auth config (Google button) ──────────────────────────────────────────
+    (async () => {
+      try {
+        const res = await fetch('/api/auth-config');
+        const { googleEnabled } = await res.json();
+        if (googleEnabled) {
+          const section = document.getElementById('google-signin-section');
+          section.innerHTML =
+            '<div class="divider">or</div>' +
+            '<a href="/auth/google" class="btn-google"><span>G</span> Continue with Google</a>';
+        }
+      } catch { /* ignore — Google button just won't appear */ }
+    })();
+
+    const USERNAME_RE = /^[a-z0-9_]{3,20}$/;
+
+    // ── Sign In ──────────────────────────────────────────────────────────────
+    document.getElementById('signin-form').addEventListener('submit', async e => {
+      e.preventDefault();
+      const errorEl = document.getElementById('signin-error');
+      errorEl.textContent = '';
+      const btn = e.target.querySelector('.submit-btn');
+
+      const username = document.getElementById('signin-username').value.trim().toLowerCase();
+      const password = document.getElementById('signin-password').value;
+
+      if (!USERNAME_RE.test(username)) {
+        errorEl.textContent = 'Invalid username format.';
+        return;
+      }
+      if (password.length < 8) {
+        errorEl.textContent = 'Password must be at least 8 characters.';
+        return;
+      }
+
+      btn.disabled = true;
+      try {
+        const res = await fetch('/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password }),
+        });
+        const data = await res.json();
+        if (data.ok) {
+          window.location.href = '/dashboard.html';
+        } else {
+          errorEl.textContent = data.error || 'Sign in failed.';
+          btn.disabled = false;
+        }
+      } catch {
+        errorEl.textContent = 'Server error. Please try again.';
+        btn.disabled = false;
+      }
+    });
+
+    // ── Register ─────────────────────────────────────────────────────────────
+    document.getElementById('register-form').addEventListener('submit', async e => {
+      e.preventDefault();
+      const errorEl = document.getElementById('register-error');
+      errorEl.textContent = '';
+      const btn = e.target.querySelector('.submit-btn');
+
+      const username = document.getElementById('reg-username').value.trim().toLowerCase();
+      const password = document.getElementById('reg-password').value;
+      const confirm  = document.getElementById('reg-confirm').value;
+
+      if (!USERNAME_RE.test(username)) {
+        errorEl.textContent = 'Username must be 3–20 characters (letters, numbers, underscores).';
+        return;
+      }
+      if (password.length < 8) {
+        errorEl.textContent = 'Password must be at least 8 characters.';
+        return;
+      }
+      if (password !== confirm) {
+        errorEl.textContent = 'Passwords do not match.';
+        return;
+      }
+
+      btn.disabled = true;
+      try {
+        const res = await fetch('/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password }),
+        });
+        const data = await res.json();
+        if (data.ok) {
+          window.location.href = '/dashboard.html';
+        } else {
+          errorEl.textContent = data.error || 'Registration failed.';
+          btn.disabled = false;
+        }
+      } catch {
+        errorEl.textContent = 'Server error. Please try again.';
+        btn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

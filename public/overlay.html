@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'none';
+    script-src 'self' 'unsafe-inline';
+    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+    font-src https://fonts.gstatic.com;
+    img-src 'self' data: https://mc-heads.net;
+    connect-src 'self' https://api.mcsrranked.com https://mc-heads.net;
+  ">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MCSR Overlay</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,700&family=Press+Start+2P&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: transparent;
+      overflow: hidden;
+    }
+
+    body {
+      display: inline-block;
+    }
+
+    #card-wrapper {
+      position: relative;
+      display: inline-block;
+      transition: opacity 0.4s;
+    }
+
+    #card-wrapper.fading {
+      opacity: 0;
+    }
+
+    #card-wrapper.hidden {
+      display: none;
+    }
+
+    .live-dot {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #ef4444;
+      box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6);
+      animation: pulse-dot 1.8s ease-in-out infinite;
+      z-index: 10;
+    }
+
+    @keyframes pulse-dot {
+      0%   { box-shadow: 0 0 0 0 rgba(239,68,68,0.6); }
+      60%  { box-shadow: 0 0 0 8px rgba(239,68,68,0); }
+      100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
+    }
+
+    #error-msg {
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      color: #dc2626;
+      background: #fff;
+      padding: 12px 20px;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="card-wrapper" class="hidden">
+    <span class="live-dot" title="Live"></span>
+    <div id="card"></div>
+  </div>
+
+  <div id="error-msg"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/overlay.js"></script>
+</body>
+</html>

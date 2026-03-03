@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'none';
+    script-src 'self' 'unsafe-inline';
+    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+    font-src https://fonts.gstatic.com;
+    img-src 'self' data: https://mc-heads.net;
+    connect-src 'self' https://api.mcsrranked.com;
+  ">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — MCSR Ranked Stats</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* ── Animations ──────────────────────────────────────────────────────────── */
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(28px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateY(12px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0)   scale(1); }
+    }
+    @keyframes overlayItemIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Nav (matches homepage) ──────────────────────────────────────────────── */
+    .db-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255,255,255,0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid transparent;
+      transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+      animation: fadeIn 0.3s ease both;
+    }
+    .db-nav.nav-scrolled {
+      background: rgba(255,255,255,0.95);
+      border-color: var(--border);
+      box-shadow: var(--shadow-sm);
+    }
+    .db-nav-inner {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 0 32px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .db-user-area {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .db-user-name {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--muted);
+    }
+    .db-signout-btn {
+      background: transparent;
+      border: 1.5px solid var(--border);
+      color: var(--muted);
+      font-size: 0.8rem;
+      padding: 7px 16px;
+      border-radius: var(--radius-lg);
+      cursor: pointer;
+      font-family: var(--font);
+      font-weight: 600;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+    }
+    .db-signout-btn:hover {
+      border-color: #dc2626;
+      color: #dc2626;
+      background: #fff0f0;
+    }
+
+    /* ── Dark header strip ───────────────────────────────────────────────────── */
+    .db-header {
+      position: relative;
+      background: #0d1e10;
+      padding: 44px 0 36px;
+      overflow: hidden;
+      color: #fff;
+      animation: fadeIn 0.4s ease both;
+    }
+    .db-header-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        repeating-linear-gradient(0deg,   transparent 0, transparent 31px, rgba(58,125,68,0.07) 31px, rgba(58,125,68,0.07) 32px),
+        repeating-linear-gradient(90deg,  transparent 0, transparent 31px, rgba(58,125,68,0.07) 31px, rgba(58,125,68,0.07) 32px);
+      pointer-events: none;
+    }
+    .db-header-glow {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 80% 120% at 50% 0%, rgba(58,125,68,0.45) 0%, transparent 65%);
+      pointer-events: none;
+    }
+    .db-header-content {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+      animation: fadeSlideUp 0.45s ease both;
+    }
+    .db-header-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: rgba(255,255,255,0.45);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 6px;
+    }
+    .db-header-title {
+      font-size: clamp(1.5rem, 3vw, 2.1rem);
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      line-height: 1.15;
+    }
+    .db-plan-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: rgba(58,125,68,0.25);
+      color: #7ed895;
+      border: 1px solid rgba(126,216,149,0.35);
+      border-radius: 100px;
+      padding: 7px 18px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      white-space: nowrap;
+    }
+    .db-plan-badge::before { content: '✦'; font-size: 0.6rem; }
+
+    /* ── Main layout ─────────────────────────────────────────────────────────── */
+    .db-main {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 36px 32px 64px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* ── Cards ───────────────────────────────────────────────────────────────── */
+    .db-card {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--border);
+      padding: 32px;
+      animation: fadeSlideUp 0.5s ease both;
+    }
+    .db-card:nth-child(1) { animation-delay: 0.05s; }
+    .db-card:nth-child(2) { animation-delay: 0.14s; }
+    .db-card:nth-child(3) { animation-delay: 0.23s; }
+
+    .db-card-title {
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.3px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+    .db-card-title-icon {
+      width: 30px;
+      height: 30px;
+      background: var(--green-muted);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+
+    /* ── Plan banner ─────────────────────────────────────────────────────────── */
+    .plan-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .plan-info p {
+      font-size: 0.88rem;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+    .plan-info strong { color: var(--text); }
+
+    /* ── Form ────────────────────────────────────────────────────────────────── */
+    .form-group { margin-bottom: 20px; }
+    .form-group label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 8px;
+    }
+    .form-group input[type="text"] {
+      width: 100%;
+      padding: 11px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-md);
+      font-size: 0.92rem;
+      font-family: var(--font);
+      color: var(--text);
+      background: #f8f9fb;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+    }
+    .form-group input[type="text"]:focus {
+      border-color: var(--green);
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(58,125,68,0.12);
+    }
+
+    .radio-group { display: flex; gap: 10px; flex-wrap: wrap; }
+    .radio-pill {
+      position: relative;
+    }
+    .radio-pill input { position: absolute; opacity: 0; width: 0; height: 0; }
+    .radio-pill label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 18px;
+      border: 1.5px solid var(--border);
+      border-radius: 100px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+      user-select: none;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+    .radio-pill input:checked + label {
+      border-color: var(--green);
+      color: var(--green);
+      background: var(--green-muted);
+    }
+
+    .slider-wrap { display: flex; align-items: center; gap: 14px; }
+    .slider-wrap input[type="range"] {
+      flex: 1;
+      accent-color: var(--green);
+      height: 4px;
+      cursor: pointer;
+    }
+    .slider-val {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--green);
+      min-width: 36px;
+      text-align: right;
+    }
+
+    #form-error {
+      color: #dc2626;
+      font-size: 0.82rem;
+      margin-top: 10px;
+      min-height: 18px;
+    }
+
+    /* ── Overlay list ────────────────────────────────────────────────────────── */
+    .overlay-list { list-style: none; display: flex; flex-direction: column; gap: 14px; }
+    .overlay-empty {
+      text-align: center;
+      padding: 32px 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    .overlay-empty-icon { font-size: 2rem; margin-bottom: 10px; opacity: 0.4; }
+
+    .overlay-item {
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 18px 20px;
+      transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+      animation: overlayItemIn 0.35s ease both;
+    }
+    .overlay-item:hover {
+      border-color: rgba(58,125,68,0.35);
+      box-shadow: var(--shadow-sm);
+      transform: translateY(-2px);
+    }
+    .overlay-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .overlay-item-name {
+      font-weight: 700;
+      font-size: 0.98rem;
+      color: var(--text);
+    }
+    .overlay-item-meta {
+      font-size: 0.78rem;
+      color: var(--muted);
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .overlay-meta-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #f1f5f9;
+      padding: 2px 9px;
+      border-radius: 100px;
+      font-weight: 600;
+    }
+    .overlay-url {
+      margin: 12px 0 14px;
+      background: #f8f9fb;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 9px 14px;
+      font-family: monospace;
+      font-size: 0.78rem;
+      word-break: break-all;
+      color: var(--muted);
+    }
+    .overlay-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    /* ── Toast ───────────────────────────────────────────────────────────────── */
+    .toast {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      background: var(--text);
+      color: #fff;
+      padding: 12px 22px;
+      border-radius: var(--radius-md);
+      font-size: 0.88rem;
+      font-weight: 600;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.22s;
+      z-index: 999;
+      box-shadow: var(--shadow-lg);
+    }
+    .toast.show {
+      opacity: 1;
+      animation: toastIn 0.25s ease both;
+    }
+
+    /* ── Responsive ──────────────────────────────────────────────────────────── */
+    @media (max-width: 600px) {
+      .db-main { padding: 24px 18px 48px; }
+      .db-card { padding: 22px 18px; }
+      .db-nav-inner { padding: 0 18px; }
+      .db-header-content { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Nav ──────────────────────────────────────────────────────────────── -->
+  <nav class="db-nav" id="db-nav">
+    <div class="db-nav-inner">
+      <a href="/" class="brand">
+        <span class="brand-icon">⏱</span>
+        <span class="brand-name">MCSR Ranked Stats</span>
+      </a>
+      <div class="db-user-area">
+        <span class="db-user-name" id="user-name">…</span>
+        <form method="POST" action="/auth/logout" style="margin:0">
+          <button type="submit" class="db-signout-btn">Sign Out</button>
+        </form>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── Header strip ─────────────────────────────────────────────────────── -->
+  <div class="db-header">
+    <div class="db-header-grid"></div>
+    <div class="db-header-glow"></div>
+    <div class="container db-header-content">
+      <div>
+        <p class="db-header-label">Overlay Dashboard</p>
+        <h1 class="db-header-title">
+          Welcome back,&nbsp;<span id="db-welcome-name" class="text-green">…</span>
+        </h1>
+      </div>
+      <div class="db-plan-badge" id="db-plan-badge">Free Plan</div>
+    </div>
+  </div>
+
+  <!-- ── Main ─────────────────────────────────────────────────────────────── -->
+  <main class="db-main">
+
+    <!-- Plan card -->
+    <div class="db-card">
+      <div class="plan-banner">
+        <div class="plan-info">
+          <div class="db-card-title" style="margin-bottom:6px">
+            <span class="db-card-title-icon">✦</span>
+            Your Plan
+          </div>
+          <p>Currently on <strong id="plan-name">Free</strong> — upgrade for unlimited overlays &amp; pro styles.</p>
+        </div>
+        <button class="btn btn-green" id="upgrade-btn">Upgrade to Pro</button>
+      </div>
+    </div>
+
+    <!-- Create overlay -->
+    <div class="db-card">
+      <div class="db-card-title">
+        <span class="db-card-title-icon">＋</span>
+        Create Overlay
+      </div>
+      <form id="create-form">
+        <div class="form-group">
+          <label for="overlay-username">MCSR Username</label>
+          <input type="text" id="overlay-username" placeholder="e.g. Feinberg" maxlength="16" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label>Style</label>
+          <div class="radio-group">
+            <div class="radio-pill">
+              <input type="radio" name="style" id="style-card" value="card" checked>
+              <label for="style-card">🃏 Card</label>
+            </div>
+            <div class="radio-pill">
+              <input type="radio" name="style" id="style-hud" value="hud">
+              <label for="style-hud">🖥 HUD</label>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Poll Interval — <span id="interval-label">30s</span></label>
+          <div class="slider-wrap">
+            <input type="range" id="interval-slider" min="10" max="120" step="5" value="30">
+            <span class="slider-val" id="interval-val">30s</span>
+          </div>
+        </div>
+        <div id="form-error"></div>
+        <button type="submit" class="btn btn-green">Create Overlay</button>
+      </form>
+    </div>
+
+    <!-- Overlay list -->
+    <div class="db-card">
+      <div class="db-card-title">
+        <span class="db-card-title-icon">📡</span>
+        Your Overlays
+      </div>
+      <ul class="overlay-list" id="overlay-list">
+        <li class="overlay-empty">
+          <div class="overlay-empty-icon">📡</div>
+          Loading…
+        </li>
+      </ul>
+    </div>
+
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="js/data.js"></script>
+  <script>
+    // ── Nav scroll shadow ────────────────────────────────────────────────────
+    window.addEventListener('scroll', () => {
+      document.getElementById('db-nav')
+        .classList.toggle('nav-scrolled', window.scrollY > 10);
+    });
+
+    // ── Toast ────────────────────────────────────────────────────────────────
+    const toast = document.getElementById('toast');
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2800);
+    }
+
+    // ── API helpers ──────────────────────────────────────────────────────────
+    async function apiGet(path) {
+      const res = await fetch(path, { headers: { Accept: 'application/json' } });
+      if (res.status === 401) { window.location.href = '/login.html'; throw new Error('Unauthorized'); }
+      return res.json();
+    }
+    async function apiPost(path, body) {
+      const res = await fetch(path, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify(body),
+      });
+      if (res.status === 401) { window.location.href = '/login.html'; throw new Error('Unauthorized'); }
+      return res.json();
+    }
+    async function apiDelete(path) {
+      const res = await fetch(path, { method: 'DELETE', headers: { Accept: 'application/json' } });
+      if (res.status === 401) { window.location.href = '/login.html'; throw new Error('Unauthorized'); }
+      return res.json();
+    }
+
+    // ── Overlay URL ──────────────────────────────────────────────────────────
+    function overlayUrl(token) {
+      return `${window.location.origin}/overlay.html?token=${token}`;
+    }
+
+    // ── Render overlay list ──────────────────────────────────────────────────
+    function renderOverlayList(configs) {
+      const list = document.getElementById('overlay-list');
+      if (!configs.length) {
+        list.innerHTML = `
+          <li class="overlay-empty">
+            <div class="overlay-empty-icon">📡</div>
+            No overlays yet — create one above.
+          </li>`;
+        return;
+      }
+      list.innerHTML = '';
+      configs.forEach((cfg, i) => {
+        const url = overlayUrl(cfg.overlay_token);
+        const li = document.createElement('li');
+        li.className = 'overlay-item';
+        li.style.animationDelay = (i * 0.07) + 's';
+        li.dataset.id = cfg.id;
+        li.innerHTML = `
+          <div class="overlay-item-header">
+            <span class="overlay-item-name">${escapeHtml(cfg.mcsr_username)}</span>
+          </div>
+          <div class="overlay-item-meta">
+            <span class="overlay-meta-pill">🃏 ${escapeHtml(cfg.style)}</span>
+            <span class="overlay-meta-pill">⏱ ${cfg.poll_interval}s</span>
+          </div>
+          <div class="overlay-url">${escapeHtml(url)}</div>
+          <div class="overlay-actions">
+            <button class="btn btn-sm btn-green copy-btn" data-url="${escapeHtml(url)}">Copy URL</button>
+            <button class="btn btn-sm delete-btn"
+              style="background:transparent;border:1.5px solid #dc2626;color:#dc2626;border-radius:var(--radius-lg);"
+              data-id="${cfg.id}">Delete</button>
+          </div>`;
+        list.appendChild(li);
+      });
+
+      list.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          navigator.clipboard.writeText(btn.dataset.url).then(() => showToast('URL copied!'));
+        });
+      });
+      list.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          if (!confirm('Delete this overlay?')) return;
+          const item = btn.closest('.overlay-item');
+          item.style.transition = 'opacity 0.2s, transform 0.2s';
+          item.style.opacity = '0';
+          item.style.transform = 'scale(0.97)';
+          try {
+            await apiDelete(`/api/overlay-configs/${btn.dataset.id}`);
+            setTimeout(loadConfigs, 220);
+          } catch (err) {
+            item.style.opacity = '1';
+            item.style.transform = '';
+            showToast('Delete failed: ' + err.message);
+          }
+        });
+      });
+    }
+
+    async function loadConfigs() {
+      try {
+        const configs = await apiGet('/api/overlay-configs');
+        renderOverlayList(configs);
+      } catch { /* already redirected */ }
+    }
+
+    // ── Init ─────────────────────────────────────────────────────────────────
+    async function init() {
+      try {
+        const me = await apiGet('/api/me');
+        const displayName = me.display_name || me.username || me.email || 'Speedrunner';
+        document.getElementById('user-name').textContent = displayName;
+        document.getElementById('db-welcome-name').textContent = displayName;
+        const isPro = me.sub_status && me.sub_status !== 'free';
+        document.getElementById('plan-name').textContent = isPro ? 'Pro' : 'Free';
+        document.getElementById('db-plan-badge').textContent = isPro ? '✦ Pro Plan' : '✦ Free Plan';
+      } catch { return; }
+      await loadConfigs();
+    }
+
+    // ── Upgrade button ───────────────────────────────────────────────────────
+    document.getElementById('upgrade-btn').addEventListener('click', () => {
+      showToast('Payments coming soon!');
+    });
+
+    // ── Interval slider ──────────────────────────────────────────────────────
+    const slider = document.getElementById('interval-slider');
+    const intervalVal = document.getElementById('interval-val');
+    const intervalLabel = document.getElementById('interval-label');
+    slider.addEventListener('input', () => {
+      const v = slider.value + 's';
+      intervalVal.textContent = v;
+      intervalLabel.textContent = v;
+    });
+
+    // ── Create form ──────────────────────────────────────────────────────────
+    document.getElementById('create-form').addEventListener('submit', async e => {
+      e.preventDefault();
+      const errEl = document.getElementById('form-error');
+      errEl.textContent = '';
+      const submitBtn = e.target.querySelector('[type="submit"]');
+
+      const username = document.getElementById('overlay-username').value.trim();
+      const validationError = validateUsername(username);
+      if (validationError) { errEl.textContent = validationError; return; }
+
+      const style = document.querySelector('input[name="style"]:checked').value;
+      const poll_interval = parseInt(slider.value, 10);
+
+      submitBtn.disabled = true;
+      try {
+        const cfg = await apiPost('/api/overlay-configs', { mcsr_username: username, style, poll_interval });
+        if (cfg.error) { errEl.textContent = cfg.error; return; }
+        document.getElementById('overlay-username').value = '';
+        slider.value = 30;
+        intervalVal.textContent = '30s';
+        intervalLabel.textContent = '30s';
+        await loadConfigs();
+        showToast('Overlay created!');
+      } catch (err) {
+        errEl.textContent = 'Failed: ' + err.message;
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+
+    init();
+  </script>
+</body>
+</html>

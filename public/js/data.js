@@ -42,3 +42,19 @@ function escapeHtml(str) {
     .replace(/&/g, '&amp;').replace(/</g, '&lt;')
     .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
+
+// Minecraft usernames: 3–16 chars, letters/digits/underscores only
+const USERNAME_RE = /^[a-zA-Z0-9_]{3,16}$/;
+
+function validateUsername(username) {
+  if (!username)            return 'Please enter a username.';
+  if (username.length < 3)  return 'Username must be at least 3 characters.';
+  if (username.length > 16) return 'Username must be 16 characters or fewer.';
+  if (!USERNAME_RE.test(username))
+                            return 'Username can only contain letters, numbers, and underscores.';
+  return null; // valid
+}
+
+function sanitizeFilename(str) {
+  return String(str).replace(/[^a-zA-Z0-9_-]/g, '_');
+}
