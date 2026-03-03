@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta http-equiv="Content-Security-Policy" content="
     default-src 'none';
@@ -14,25 +15,55 @@
   <title>Dashboard — MCSR Ranked Stats</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <style>
     /* ── Animations ──────────────────────────────────────────────────────────── */
     @keyframes fadeSlideUp {
-      from { opacity: 0; transform: translateY(28px); }
-      to   { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(28px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
+
     @keyframes fadeIn {
-      from { opacity: 0; }
-      to   { opacity: 1; }
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
     }
+
     @keyframes toastIn {
-      from { opacity: 0; transform: translateY(12px) scale(0.97); }
-      to   { opacity: 1; transform: translateY(0)   scale(1); }
+      from {
+        opacity: 0;
+        transform: translateY(12px) scale(0.97);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
     }
+
     @keyframes overlayItemIn {
-      from { opacity: 0; transform: translateY(12px); }
-      to   { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     /* ── Nav (matches homepage) ──────────────────────────────────────────────── */
@@ -40,18 +71,20 @@
       position: sticky;
       top: 0;
       z-index: 100;
-      background: rgba(255,255,255,0.75);
+      background: rgba(255, 255, 255, 0.75);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       border-bottom: 1px solid transparent;
       transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
       animation: fadeIn 0.3s ease both;
     }
+
     .db-nav.nav-scrolled {
-      background: rgba(255,255,255,0.95);
+      background: rgba(255, 255, 255, 0.95);
       border-color: var(--border);
       box-shadow: var(--shadow-sm);
     }
+
     .db-nav-inner {
       max-width: var(--max-w);
       margin: 0 auto;
@@ -61,16 +94,19 @@
       align-items: center;
       justify-content: space-between;
     }
+
     .db-user-area {
       display: flex;
       align-items: center;
       gap: 14px;
     }
+
     .db-user-name {
       font-size: 0.88rem;
       font-weight: 600;
       color: var(--muted);
     }
+
     .db-signout-btn {
       background: transparent;
       border: 1.5px solid var(--border);
@@ -83,6 +119,7 @@
       font-weight: 600;
       transition: border-color 0.15s, color 0.15s, background 0.15s;
     }
+
     .db-signout-btn:hover {
       border-color: #dc2626;
       color: #dc2626;
@@ -98,20 +135,23 @@
       color: #fff;
       animation: fadeIn 0.4s ease both;
     }
+
     .db-header-grid {
       position: absolute;
       inset: 0;
       background-image:
-        repeating-linear-gradient(0deg,   transparent 0, transparent 31px, rgba(58,125,68,0.07) 31px, rgba(58,125,68,0.07) 32px),
-        repeating-linear-gradient(90deg,  transparent 0, transparent 31px, rgba(58,125,68,0.07) 31px, rgba(58,125,68,0.07) 32px);
+        repeating-linear-gradient(0deg, transparent 0, transparent 31px, rgba(58, 125, 68, 0.07) 31px, rgba(58, 125, 68, 0.07) 32px),
+        repeating-linear-gradient(90deg, transparent 0, transparent 31px, rgba(58, 125, 68, 0.07) 31px, rgba(58, 125, 68, 0.07) 32px);
       pointer-events: none;
     }
+
     .db-header-glow {
       position: absolute;
       inset: 0;
-      background: radial-gradient(ellipse 80% 120% at 50% 0%, rgba(58,125,68,0.45) 0%, transparent 65%);
+      background: radial-gradient(ellipse 80% 120% at 50% 0%, rgba(58, 125, 68, 0.45) 0%, transparent 65%);
       pointer-events: none;
     }
+
     .db-header-content {
       position: relative;
       z-index: 1;
@@ -122,27 +162,30 @@
       flex-wrap: wrap;
       animation: fadeSlideUp 0.45s ease both;
     }
+
     .db-header-label {
       font-size: 0.72rem;
       font-weight: 700;
-      color: rgba(255,255,255,0.45);
+      color: rgba(255, 255, 255, 0.45);
       text-transform: uppercase;
       letter-spacing: 2px;
       margin-bottom: 6px;
     }
+
     .db-header-title {
       font-size: clamp(1.5rem, 3vw, 2.1rem);
       font-weight: 900;
       letter-spacing: -0.5px;
       line-height: 1.15;
     }
+
     .db-plan-badge {
       display: inline-flex;
       align-items: center;
       gap: 7px;
-      background: rgba(58,125,68,0.25);
+      background: rgba(58, 125, 68, 0.25);
       color: #7ed895;
-      border: 1px solid rgba(126,216,149,0.35);
+      border: 1px solid rgba(126, 216, 149, 0.35);
       border-radius: 100px;
       padding: 7px 18px;
       font-size: 0.82rem;
@@ -150,7 +193,11 @@
       letter-spacing: 0.3px;
       white-space: nowrap;
     }
-    .db-plan-badge::before { content: '✦'; font-size: 0.6rem; }
+
+    .db-plan-badge::before {
+      content: '✦';
+      font-size: 0.6rem;
+    }
 
     /* ── Main layout ─────────────────────────────────────────────────────────── */
     .db-main {
@@ -170,10 +217,25 @@
       border: 1px solid var(--border);
       padding: 32px;
       animation: fadeSlideUp 0.5s ease both;
+      transition: box-shadow 0.2s ease, transform 0.2s ease;
     }
-    .db-card:nth-child(1) { animation-delay: 0.05s; }
-    .db-card:nth-child(2) { animation-delay: 0.14s; }
-    .db-card:nth-child(3) { animation-delay: 0.23s; }
+
+    .db-card:hover {
+      box-shadow: var(--shadow-lg);
+      transform: translateY(-2px);
+    }
+
+    .db-card:nth-child(1) {
+      animation-delay: 0.05s;
+    }
+
+    .db-card:nth-child(2) {
+      animation-delay: 0.14s;
+    }
+
+    .db-card:nth-child(3) {
+      animation-delay: 0.23s;
+    }
 
     .db-card-title {
       font-size: 1rem;
@@ -185,6 +247,7 @@
       align-items: center;
       gap: 9px;
     }
+
     .db-card-title-icon {
       width: 30px;
       height: 30px;
@@ -205,15 +268,22 @@
       gap: 16px;
       flex-wrap: wrap;
     }
+
     .plan-info p {
       font-size: 0.88rem;
       color: var(--muted);
       margin-top: 3px;
     }
-    .plan-info strong { color: var(--text); }
+
+    .plan-info strong {
+      color: var(--text);
+    }
 
     /* ── Form ────────────────────────────────────────────────────────────────── */
-    .form-group { margin-bottom: 20px; }
+    .form-group {
+      margin-bottom: 20px;
+    }
+
     .form-group label {
       display: block;
       font-size: 0.78rem;
@@ -223,6 +293,7 @@
       letter-spacing: 0.8px;
       margin-bottom: 8px;
     }
+
     .form-group input[type="text"] {
       width: 100%;
       padding: 11px 16px;
@@ -235,10 +306,17 @@
       outline: none;
       transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
     }
+
     .form-group input[type="text"]:focus {
       border-color: var(--green);
       background: #fff;
-      box-shadow: 0 0 0 3px rgba(58,125,68,0.12);
+      box-shadow: 0 0 0 3px rgba(58, 125, 68, 0.12);
+    }
+
+    .form-row {
+      display: flex;
+      gap: 10px;
+      align-items: stretch;
     }
 
     /* ── Widget card ─────────────────────────────────────────────────────────── */
@@ -254,7 +332,13 @@
       margin: 12px 0 16px;
       min-height: 36px;
     }
-    .widget-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .widget-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
     .btn-danger {
       background: transparent;
       border: 1.5px solid #dc2626;
@@ -267,7 +351,10 @@
       cursor: pointer;
       transition: background 0.15s, color 0.15s;
     }
-    .btn-danger:hover { background: #fff0f0; }
+
+    .btn-danger:hover {
+      background: #fff0f0;
+    }
 
     /* ── Toast ───────────────────────────────────────────────────────────────── */
     .toast {
@@ -286,6 +373,7 @@
       z-index: 999;
       box-shadow: var(--shadow-lg);
     }
+
     .toast.show {
       opacity: 1;
       animation: toastIn 0.25s ease both;
@@ -293,13 +381,26 @@
 
     /* ── Responsive ──────────────────────────────────────────────────────────── */
     @media (max-width: 600px) {
-      .db-main { padding: 24px 18px 48px; }
-      .db-card { padding: 22px 18px; }
-      .db-nav-inner { padding: 0 18px; }
-      .db-header-content { flex-direction: column; align-items: flex-start; }
+      .db-main {
+        padding: 24px 18px 48px;
+      }
+
+      .db-card {
+        padding: 22px 18px;
+      }
+
+      .db-nav-inner {
+        padding: 0 18px;
+      }
+
+      .db-header-content {
+        flex-direction: column;
+        align-items: flex-start;
+      }
     }
   </style>
 </head>
+
 <body>
 
   <!-- ── Nav ──────────────────────────────────────────────────────────────── -->
@@ -344,15 +445,19 @@
             <span class="db-card-title-icon">✦</span>
             Your Plan
           </div>
-          <p>Currently on <strong id="plan-name">Free</strong><span id="plan-renew"></span> — upgrade for unlimited overlays &amp; pro styles.</p>
+          <p>Currently on <strong id="plan-name">Free</strong><span id="plan-renew"></span> — upgrade for unlimited
+            overlays &amp; pro styles.</p>
         </div>
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;flex-shrink:0;">
           <button class="btn btn-green" id="upgrade-btn">Upgrade to Pro</button>
           <button class="btn btn-green" id="billing-btn" style="display:none">Manage Billing</button>
         </div>
       </div>
-      <div id="past-due-warning" style="display:none;margin-top:16px;padding:12px 16px;background:#fef3c7;border:1px solid #f59e0b;border-radius:var(--radius-md);font-size:0.85rem;color:#92400e;">
-        Your payment failed. Please <button id="update-payment-btn" style="background:none;border:none;color:#d97706;text-decoration:underline;cursor:pointer;font:inherit;font-weight:700;padding:0">update your payment method</button> to keep your Pro subscription.
+      <div id="past-due-warning"
+        style="display:none;margin-top:16px;padding:12px 16px;background:#fef3c7;border:1px solid #f59e0b;border-radius:var(--radius-md);font-size:0.85rem;color:#92400e;">
+        Your payment failed. Please <button id="update-payment-btn"
+          style="background:none;border:none;color:#d97706;text-decoration:underline;cursor:pointer;font:inherit;font-weight:700;padding:0">update
+          your payment method</button> to keep your Pro subscription.
       </div>
     </div>
 
@@ -362,12 +467,14 @@
         <span class="db-card-title-icon">📡</span>
         Your OBS Widget
       </div>
-      <div class="form-group" style="display:flex;gap:10px;align-items:flex-end;margin-bottom:0">
-        <div style="flex:1">
-          <label for="widget-username">MCSR Username</label>
-          <input type="text" id="widget-username" placeholder="e.g. MoleyG" maxlength="16" autocomplete="off">
+      <div class="form-group" style="margin-bottom:0">
+        <label for="widget-username">MCSR Username</label>
+        <div class="form-row">
+          <input type="text" id="widget-username" placeholder="e.g. MoleyG" maxlength="16" autocomplete="off"
+            style="flex:1">
+          <button class="btn btn-green" id="save-username-btn"
+            style="padding: 0 24px; white-space: nowrap;">Save</button>
         </div>
-        <button class="btn btn-green" id="save-username-btn" style="margin-bottom:1px">Save</button>
       </div>
       <div id="save-username-error" style="color:#dc2626;font-size:0.82rem;min-height:18px;margin-top:6px"></div>
 
@@ -438,7 +545,7 @@
     function updateWidgetUrlDisplay() {
       const username = document.getElementById('widget-username').value.trim();
       const urlDisplay = document.getElementById('widget-url-display');
-      const copyBtn   = document.getElementById('copy-widget-url-btn');
+      const copyBtn = document.getElementById('copy-widget-url-btn');
       const url = widgetUrl(username, currentWidgetToken);
       if (url) {
         urlDisplay.textContent = url;
@@ -501,7 +608,7 @@
         document.getElementById('user-name').textContent = displayName;
         document.getElementById('db-welcome-name').textContent = displayName;
 
-        const isPro   = me.sub_status === 'active';
+        const isPro = me.sub_status === 'active';
         const pastDue = me.sub_status === 'past_due';
 
         document.getElementById('plan-name').textContent = isPro ? 'Pro' : (pastDue ? 'Pro (past due)' : 'Free');
@@ -565,4 +672,5 @@
     init();
   </script>
 </body>
+
 </html>

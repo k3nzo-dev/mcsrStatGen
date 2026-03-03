@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:mcsrranked.com)",
+      "WebFetch(domain:api.mcsrranked.com)",
+      "WebFetch(domain:docs.mcsrranked.com)",
+      "WebSearch",
+      "Bash(git:*)",
+      "Bash(gh repo:*)",
+      "WebFetch(domain:wiki.mcsrranked.com)"
+    ]
+  }
+}
