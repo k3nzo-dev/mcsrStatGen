@@ -19,7 +19,8 @@ const isProduction = process.env.NODE_ENV === 'production'
   || !!process.env.RAILWAY_ENVIRONMENT;
 
 if (isProduction && !process.env.SESSION_SECRET) {
-  console.warn('[server] WARNING: SESSION_SECRET not set — using insecure default.');
+  console.error('[server] FATAL: SESSION_SECRET must be set in production.');
+  process.exit(1);
 }
 
 // Trust reverse proxy so secure cookies work over HTTPS
@@ -136,6 +137,8 @@ const authLimiter = rateLimit({
 });
 app.use('/auth/login', authLimiter);
 app.use('/auth/register', authLimiter);
+app.use('/auth/forgot-password', authLimiter);
+app.use('/auth/reset-password', authLimiter);
 
 // ── CSRF Protection ──────────────────────────────────────────────────────────
 app.use((req, res, next) => {
