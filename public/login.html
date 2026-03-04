@@ -140,46 +140,6 @@
       cursor: not-allowed;
     }
 
-    /* Google button */
-    .divider {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin: 24px 0 16px;
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    .divider::before,
-    .divider::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: var(--border);
-    }
-
-    .btn-google {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      width: 100%;
-      padding: 12px 24px;
-      background: #4285f4;
-      color: #fff;
-      border: none;
-      border-radius: var(--radius-md);
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      text-decoration: none;
-      transition: opacity 0.15s;
-    }
-
-    .btn-google:hover {
-      opacity: 0.88;
-    }
-
     .error-msg {
       color: #dc2626;
       font-size: 13px;
@@ -224,7 +184,6 @@
           <div class="error-msg" id="signin-error"></div>
         </form>
 
-        <div id="google-signin-section"></div>
       </div>
 
       <!-- Register -->

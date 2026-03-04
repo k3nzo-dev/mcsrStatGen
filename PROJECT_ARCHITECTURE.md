@@ -15,7 +15,7 @@ The application is hosted on **Railway**.
 ## 2. Tech Stack
 - **Backend:** Node.js, Express.js
 - **Database:** PostgreSQL (using `pg` driver)
-- **Authentication:** Passport.js (Local username/password + Google OAuth 2.0)
+- **Authentication:** Passport.js (Local username/password)
 - **Payments:** Stripe API (Checkout, Billing Portal, Webhooks)
 - **Frontend:** Vanilla HTML5, CSS3, JavaScript (no framework)
 - **Graphics/Images:** Native browser Canvas API
@@ -27,14 +27,18 @@ The application is hosted on **Railway**.
 ### `server/` (Backend / REST API)
 - **`index.js`**: Application entry point. Handles middleware, rate limiting, helmet security, express-sessions (backed by Postgres), Stripe raw webhooks, and static file serving.
 - **`db.js`**: Manages the PostgreSQL connection pool. Contains `initSchema()` to define and migrate database tables (`users`, `subscriptions`, `overlay_configs`, `tracked_players`).
-- **`auth.js`**: Configures Passport.js. Contains the logic for `LocalStrategy` (bcrypt hashing) and `GoogleStrategy` (OAuth upserts).
-- **`routes/auth.js`**: Express router for `/auth/*` endpoints (login, register, logout, google redirect).
-- **`routes/api.js`**: Express router for `/api/*` internal endpoints. Handles authenticated user profiles, widget token generation, subscription management, and public site stats tracking.
+- **`auth.js`**: Configures Passport.js. Contains the logic for `LocalStrategy` (bcrypt hashing).
+- **`routes/auth.js`**: Express router for `/auth/*` endpoints (login, register, logout).
+- **`routes/api.js`**: Express router for `/api/*` internal endpoints. Handles authenticated user profiles, widget token generation (`requirePro` gated), subscription management, Stripe product caching (`/api/pro-product`), and public site stats tracking.
+
+### `scripts/` (CLI Utilities)
+- **`set-pro.js`**: Utility script to manually grant Pro subscription status to a user via the database. Useful for beta testers or manual overrides.
 
 ### `public/` (Frontend UI)
 - **`index.html`**: The public landing page. Contains the public stat card generator and dynamic "hero" stats showcasing total players tracked, top Elo, etc.
-- **`dashboard.html`**: The post-login management dashboard. Users can view their subscription plan and configure their OBS widget URL.
+- **`dashboard.html`**: The post-login management dashboard. Users check their subscription plan and configure their OBS widget URL. Free users see a blurred preview and an upgrade CTA; Pro users get the full configurator.
 - **`login.html`**: The authentication page (Sign up / Sign in).
+- **`upgrade.html`**: The Premium checkout page containing Stripe product info and a 3-state CTA (Sign in / Subscribe / Manage billing).
 - **`widget.html`** & **`overlay.html`**: Minimal HTML pages meant to be loaded directly as Browser Sources in OBS. They display the stats card and a live polling indicator.
 - **`style.css`**: Global design system. Uses CSS variables for consistent glassmorphism, responsive grid layouts, MCSR tier colors, and premium drop-shadows.
 
@@ -45,6 +49,7 @@ The application is hosted on **Railway**.
 - **`ui.js`**: Contains DOM manipulation for rendering detailed stats modules AND the highly complex `downloadCard()` function, which draws the DOM elements onto an HTML Canvas to export as a `.png`.
 - **`app.js`**: The main controller for `index.html`. Wires the search inputs, toggle switches, and delegates to `ui.js` and `matchData.js`.
 - **`widget.js`** / **`overlay.js`**: Handles the logic for `widget.html` and `overlay.html`. Authenticates the token, fetches initial data, and implements a `setInterval` loop to seamlessly fade and refresh the card when data changes during a live stream.
+- **`upgrade.js`**: Handles Stripe checkout session creation, fetch calls to `/api/pro-product`, and dynamic CTA state management on the upgrade page.
 
 ---
 

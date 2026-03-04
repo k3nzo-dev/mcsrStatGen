@@ -3,7 +3,7 @@
 <head>
   <meta http-equiv="Content-Security-Policy" content="
     default-src 'none';
-    script-src 'self' 'unsafe-inline';
+    script-src 'self';
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
     font-src https://fonts.gstatic.com;
     img-src 'self' data:;
@@ -100,23 +100,100 @@
       line-height: 1.6;
     }
 
-    /* ── Pricing card ─────────────────────────────────────────────────────── */
+    /* ── Main layout ─────────────────────────────────────────────────────── */
     .up-main {
-      max-width: 520px;
+      max-width: 780px;
       margin: -36px auto 0;
       padding: 0 24px 64px;
       position: relative;
       z-index: 2;
     }
+
+    /* ── Free vs Pro comparison ───────────────────────────────────────────── */
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+    .compare-card {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--border);
+      padding: 28px 24px;
+      animation: fadeSlideUp 0.5s ease both;
+    }
+    .compare-card:nth-child(2) { animation-delay: 0.08s; }
+    .compare-card.compare-pro {
+      border-color: var(--green);
+      box-shadow: 0 4px 24px rgba(58,125,68,0.18);
+    }
+    .compare-card-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .compare-card-price {
+      font-size: 1.8rem;
+      font-weight: 900;
+      letter-spacing: -1px;
+      margin-bottom: 16px;
+    }
+    .compare-card.compare-pro .compare-card-price { color: var(--green); }
+    .compare-features {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .compare-features li {
+      font-size: 0.88rem;
+      color: var(--text);
+      padding: 6px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .compare-features li::before {
+      content: '';
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      background-size: 16px;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+    .compare-features.features-free li::before {
+      background-color: #f1f5f9;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath fill='%236b7280' d='M8.5 13.3 5 9.8l1.1-1.1 2.4 2.4 5-5L14.6 7.2z'/%3E%3C/svg%3E");
+    }
+    .compare-features.features-pro li::before {
+      background-color: var(--green-muted);
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath fill='%233a7d44' d='M8.5 13.3 5 9.8l1.1-1.1 2.4 2.4 5-5L14.6 7.2z'/%3E%3C/svg%3E");
+    }
+    .compare-features .feature-disabled {
+      color: var(--muted);
+      text-decoration: line-through;
+      opacity: 0.6;
+    }
+    .compare-features .feature-disabled::before {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath fill='%239ca3af' d='M6.3 6.3l7.4 7.4M13.7 6.3l-7.4 7.4' stroke='%239ca3af' stroke-width='1.5' fill='none'/%3E%3C/svg%3E") !important;
+      background-color: #f1f5f9 !important;
+    }
+
+    /* ── Pricing card (CTA area) ─────────────────────────────────────────── */
     .pricing-card {
       background: var(--surface);
       border-radius: var(--radius-lg);
       box-shadow: var(--shadow-lg);
       border: 1px solid var(--border);
-      padding: 40px 36px;
+      padding: 32px 36px;
       text-align: center;
       animation: fadeSlideUp 0.5s ease both;
-      animation-delay: 0.1s;
+      animation-delay: 0.15s;
     }
     .pricing-card-name {
       font-size: 1.4rem;
@@ -136,39 +213,13 @@
       font-size: 0.88rem;
       color: var(--muted);
       font-weight: 500;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
     .pricing-card-desc {
       font-size: 0.92rem;
       color: var(--muted);
       line-height: 1.6;
       margin-bottom: 24px;
-    }
-    .pricing-features {
-      text-align: left;
-      list-style: none;
-      margin-bottom: 28px;
-    }
-    .pricing-features li {
-      font-size: 0.9rem;
-      color: var(--text);
-      padding: 7px 0;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .pricing-features li::before {
-      content: '';
-      display: inline-block;
-      width: 20px;
-      height: 20px;
-      background: var(--green-muted);
-      border-radius: 50%;
-      flex-shrink: 0;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath fill='%233a7d44' d='M8.5 13.3 5 9.8l1.1-1.1 2.4 2.4 5-5L14.6 7.2z'/%3E%3C/svg%3E");
-      background-size: 18px;
-      background-position: center;
-      background-repeat: no-repeat;
     }
     .pricing-divider {
       height: 1px;
@@ -199,13 +250,89 @@
     }
     .pricing-manage-link:hover { color: var(--green-dark); }
 
-    /* ── Footer note ──────────────────────────────────────────────────────── */
-    .up-footer-note {
-      text-align: center;
-      font-size: 0.82rem;
-      color: var(--muted);
-      padding: 0 24px 48px;
+    /* ── Manage subscription view ────────────────────────────────────────── */
+    .manage-card {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border);
+      padding: 36px;
+      animation: fadeSlideUp 0.5s ease both;
+      animation-delay: 0.08s;
+      margin-bottom: 20px;
     }
+    .manage-card-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .manage-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.9rem;
+    }
+    .manage-row:last-child { border-bottom: none; }
+    .manage-row-label { color: var(--muted); font-weight: 600; }
+    .manage-row-value { color: var(--text); font-weight: 700; }
+    .manage-status-badge {
+      display: inline-flex;
+      padding: 4px 12px;
+      border-radius: 100px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .status-active {
+      background: var(--green-muted);
+      color: var(--green-dark);
+    }
+    .status-past-due {
+      background: #fef3c7;
+      color: #92400e;
+    }
+    .manage-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 24px;
+      flex-wrap: wrap;
+    }
+    .btn-outline {
+      background: transparent;
+      border: 1.5px solid var(--border);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 10px 20px;
+      font-size: 0.88rem;
+      font-family: var(--font);
+      font-weight: 600;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .btn-outline:hover {
+      border-color: var(--green);
+      background: rgba(58,125,68,0.04);
+    }
+    .btn-outline-danger {
+      background: transparent;
+      border: 1.5px solid #dc2626;
+      color: #dc2626;
+      border-radius: 10px;
+      padding: 10px 20px;
+      font-size: 0.88rem;
+      font-family: var(--font);
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-outline-danger:hover { background: #fff0f0; }
 
     /* ── Loading skeleton ─────────────────────────────────────────────────── */
     .skeleton {
@@ -217,6 +344,14 @@
     @keyframes shimmer {
       0% { background-position: 200% 0; }
       100% { background-position: -200% 0; }
+    }
+
+    /* ── Footer note ─────────────────────────────────────────────────────── */
+    .up-footer-note {
+      text-align: center;
+      font-size: 0.82rem;
+      color: var(--muted);
+      padding: 0 24px 48px;
     }
 
     /* ── Toast ────────────────────────────────────────────────────────────── */
@@ -243,7 +378,9 @@
 
     @media (max-width: 600px) {
       .up-main { padding: 0 16px 48px; }
+      .comparison-grid { grid-template-columns: 1fr; }
       .pricing-card { padding: 28px 22px; }
+      .manage-card { padding: 24px 20px; }
       .up-nav-inner { padding: 0 18px; }
     }
   </style>
@@ -271,164 +408,83 @@
     </div>
   </section>
 
-  <!-- ── Pricing card ─────────────────────────────────────────────────────── -->
+  <!-- ── Main ─────────────────────────────────────────────────────────────── -->
   <div class="up-main">
-    <div class="pricing-card">
-      <div class="pricing-card-name" id="product-name">Pro Plan</div>
-      <div class="pricing-card-price" id="product-price">
-        <div class="skeleton" style="height:42px;width:140px;margin:0 auto"></div>
+
+    <!-- Free vs Pro comparison (shown to free/logged-out users) -->
+    <div id="free-comparison">
+      <div class="comparison-grid">
+        <div class="compare-card">
+          <div class="compare-card-title">Free</div>
+          <div class="compare-card-price">$0</div>
+          <ul class="compare-features features-free">
+            <li>Stats card generator</li>
+            <li>Season &amp; career stats</li>
+            <li>PNG download</li>
+            <li class="feature-disabled">OBS stream widget</li>
+            <li class="feature-disabled">Custom widget themes</li>
+            <li class="feature-disabled">Priority support</li>
+          </ul>
+        </div>
+        <div class="compare-card compare-pro">
+          <div class="compare-card-title">Pro</div>
+          <div class="compare-card-price" id="compare-pro-price">
+            <div class="skeleton" style="height:32px;width:100px;margin:0 auto"></div>
+          </div>
+          <ul class="compare-features features-pro">
+            <li>Everything in Free</li>
+            <li>Live OBS stream widget</li>
+            <li>Custom widget themes &amp; colors</li>
+            <li>Real-time stat updates</li>
+            <li>Premium badge</li>
+            <li>Priority support</li>
+          </ul>
+        </div>
       </div>
-      <div class="pricing-card-interval" id="product-interval"></div>
-      <p class="pricing-card-desc" id="product-desc">Loading product details...</p>
 
-      <ul class="pricing-features" id="product-features">
-        <li>Live OBS stream overlay</li>
-        <li>Real-time stat updates while you play</li>
-        <li>Custom widget URL for your channel</li>
-        <li>Priority support</li>
-      </ul>
-
-      <div class="pricing-divider"></div>
-
-      <button class="btn btn-green btn-lg pricing-cta" id="cta-btn" disabled>Loading...</button>
-      <button class="pricing-manage-link" id="manage-billing-btn" style="display:none">Manage Billing</button>
+      <div class="pricing-card">
+        <div class="pricing-card-name" id="product-name">Pro Plan</div>
+        <div class="pricing-card-price" id="product-price">
+          <div class="skeleton" style="height:42px;width:140px;margin:0 auto"></div>
+        </div>
+        <div class="pricing-card-interval" id="product-interval"></div>
+        <p class="pricing-card-desc" id="product-desc">Loading product details...</p>
+        <div class="pricing-divider"></div>
+        <button class="btn btn-green btn-lg pricing-cta" id="cta-btn" disabled>Loading...</button>
+        <button class="pricing-manage-link" id="manage-billing-btn" style="display:none">Manage Billing</button>
+      </div>
     </div>
+
+    <!-- Manage subscription view (shown to Pro users) -->
+    <div id="manage-view" style="display:none">
+      <div class="manage-card">
+        <div class="manage-card-title">Your Subscription</div>
+        <div class="manage-row">
+          <span class="manage-row-label">Status</span>
+          <span class="manage-row-value"><span class="manage-status-badge status-active" id="manage-status">Active</span></span>
+        </div>
+        <div class="manage-row" id="manage-renew-row">
+          <span class="manage-row-label">Renewal Date</span>
+          <span class="manage-row-value" id="manage-renew-date">—</span>
+        </div>
+        <div class="manage-row">
+          <span class="manage-row-label">Plan</span>
+          <span class="manage-row-value">Pro</span>
+        </div>
+        <div class="manage-actions">
+          <button class="btn-outline" id="update-payment-btn">Update Payment Method</button>
+          <button class="btn-outline-danger" id="cancel-sub-btn">Cancel Subscription</button>
+        </div>
+      </div>
+
+    </div>
+
   </div>
 
   <p class="up-footer-note">Secure payments via Stripe. Cancel anytime.</p>
 
   <div class="toast" id="toast"></div>
 
-  <script>
-    // ── Nav scroll shadow ──────────────────────────────────────────────────
-    window.addEventListener('scroll', () => {
-      document.getElementById('up-nav')
-        .classList.toggle('nav-scrolled', window.scrollY > 10);
-    });
-
-    // ── Toast ──────────────────────────────────────────────────────────────
-    const toast = document.getElementById('toast');
-    function showToast(msg) {
-      toast.textContent = msg;
-      toast.classList.add('show');
-      setTimeout(() => toast.classList.remove('show'), 2800);
-    }
-
-    // ── Format price ───────────────────────────────────────────────────────
-    function formatPrice(amount, currency) {
-      return new Intl.NumberFormat(undefined, {
-        style: 'currency',
-        currency: currency || 'usd',
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 2,
-      }).format(amount / 100);
-    }
-
-    // ── Init ───────────────────────────────────────────────────────────────
-    async function init() {
-      // Success toast from Stripe redirect
-      const params = new URLSearchParams(window.location.search);
-      if (params.get('upgraded') === '1') {
-        showToast('Welcome to Pro! Your subscription is active.');
-        window.history.replaceState({}, '', '/upgrade.html');
-      }
-
-      // Fetch auth + product info in parallel
-      const [meRes, productRes] = await Promise.allSettled([
-        fetch('/api/me', { headers: { Accept: 'application/json' } }).then(r => r.ok ? r.json() : null),
-        fetch('/api/pro-product', { headers: { Accept: 'application/json' } }).then(r => r.ok ? r.json() : null),
-      ]);
-
-      const me = meRes.status === 'fulfilled' ? meRes.value : null;
-      const product = productRes.status === 'fulfilled' ? productRes.value : null;
-
-      // ── Nav auth button ────────────────────────────────────────────────
-      const navBtn = document.getElementById('nav-auth-btn');
-      if (me) {
-        navBtn.textContent = 'Dashboard';
-        navBtn.href = '/dashboard.html';
-      }
-
-      // ── Product info ───────────────────────────────────────────────────
-      const priceEl = document.getElementById('product-price');
-      const intervalEl = document.getElementById('product-interval');
-      const nameEl = document.getElementById('product-name');
-      const descEl = document.getElementById('product-desc');
-      const heroSub = document.getElementById('hero-sub');
-
-      if (product) {
-        nameEl.textContent = product.name || 'Pro Plan';
-        priceEl.textContent = formatPrice(product.price_amount, product.price_currency);
-        intervalEl.textContent = product.interval ? `per ${product.interval}` : '';
-        if (product.description) {
-          descEl.textContent = product.description;
-          heroSub.textContent = product.description;
-        } else {
-          descEl.textContent = 'Unlock the full streaming experience with a live OBS overlay.';
-        }
-      } else {
-        priceEl.textContent = '';
-        descEl.textContent = 'Product details unavailable. Please try again later.';
-      }
-
-      // ── CTA button state ───────────────────────────────────────────────
-      const ctaBtn = document.getElementById('cta-btn');
-      const manageBtn = document.getElementById('manage-billing-btn');
-      const isPro = me && me.sub_status === 'active';
-
-      if (!me) {
-        // Not logged in
-        ctaBtn.textContent = 'Sign In to Subscribe';
-        ctaBtn.disabled = false;
-        ctaBtn.addEventListener('click', () => {
-          window.location.href = '/login.html';
-        });
-      } else if (isPro) {
-        // Already Pro
-        ctaBtn.textContent = "You're on Pro";
-        ctaBtn.disabled = true;
-        manageBtn.style.display = '';
-        manageBtn.addEventListener('click', async () => {
-          try {
-            const res = await fetch('/api/billing-portal', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json', Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-            });
-            const data = await res.json();
-            if (data.url) window.location.href = data.url;
-            else showToast(data.error || 'Could not open billing portal.');
-          } catch { showToast('Failed to open billing portal.'); }
-        });
-      } else {
-        // Free user — subscribe
-        ctaBtn.textContent = 'Subscribe Now';
-        ctaBtn.disabled = false;
-        ctaBtn.addEventListener('click', async () => {
-          ctaBtn.disabled = true;
-          ctaBtn.textContent = 'Redirecting...';
-          try {
-            const res = await fetch('/api/subscribe', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json', Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-            });
-            const data = await res.json();
-            if (data.url) {
-              window.location.href = data.url;
-            } else {
-              showToast(data.error || 'Something went wrong.');
-              ctaBtn.disabled = false;
-              ctaBtn.textContent = 'Subscribe Now';
-            }
-          } catch {
-            showToast('Failed to start checkout.');
-            ctaBtn.disabled = false;
-            ctaBtn.textContent = 'Subscribe Now';
-          }
-        });
-      }
-    }
-
-    init();
-  </script>
+  <script src="js/upgrade.js"></script>
 </body>
 </html>

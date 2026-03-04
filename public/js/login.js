@@ -8,20 +8,6 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     });
 });
 
-// ── Auth config (Google button) ──────────────────────────────────────────
-(async () => {
-    try {
-        const res = await fetch('/api/auth-config');
-        const { googleEnabled } = await res.json();
-        if (googleEnabled) {
-            const section = document.getElementById('google-signin-section');
-            section.innerHTML =
-                '<div class="divider">or</div>' +
-                '<a href="/auth/google" class="btn-google"><span>G</span> Continue with Google</a>';
-        }
-    } catch { /* ignore — Google button just won't appear */ }
-})();
-
 const USERNAME_RE = /^[a-z0-9_]{3,20}$/;
 
 // ── Sign In ──────────────────────────────────────────────────────────────

@@ -47,34 +47,6 @@
       display: none;
     }
 
-    .live-dot {
-      position: absolute;
-      top: 14px;
-      right: 14px;
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background: #ef4444;
-      border: 2px solid #222;
-      box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
-      animation: pulse-dot 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-      z-index: 10;
-    }
-
-    @keyframes pulse-dot {
-      0% {
-        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
-      }
-
-      50% {
-        box-shadow: 0 0 0 6px rgba(239, 68, 68, 0);
-      }
-
-      100% {
-        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
-      }
-    }
-
     #error-msg {
       font-family: 'Inter', sans-serif;
       font-size: 14px;
@@ -83,13 +55,81 @@
       padding: 12px 20px;
       border-radius: 10px;
     }
+
+    /* ── Widget themes ──────────────────────────────────────────────────── */
+    .mc-card.theme-light {
+      background: #fff;
+      color: var(--text);
+    }
+
+    .mc-card.theme-dark {
+      background: #1a1f2e;
+      color: #e2e8f0;
+    }
+    .theme-dark .mc-skin-panel {
+      background: #232a3b;
+      border-right-color: #2d3548;
+    }
+    .theme-dark .mc-name { color: #f1f5f9; }
+    .theme-dark .mc-elo { color: #f1f5f9; }
+    .theme-dark .mc-elo-unit { color: #94a3b8; }
+    .theme-dark .mc-divider { background: #2d3548; }
+    .theme-dark .mc-col-label { color: #94a3b8; }
+    .theme-dark .mc-cr { color: #94a3b8; }
+    .theme-dark .mc-best { color: #e2e8f0; }
+    .theme-dark .mc-best span { color: #94a3b8; }
+    .theme-dark .mc-footer {
+      background: #151a27;
+      border-top-color: #2d3548;
+      color: #64748b;
+    }
+    .theme-dark .mc-detail-section { border-top-color: #2d3548; }
+    .theme-dark .mc-breakdown-table th { color: #94a3b8; border-bottom-color: #2d3548; }
+    .theme-dark .mc-breakdown-table td { color: #e2e8f0; }
+    .theme-dark .mc-wr-bar-track { background: #2d3548; }
+    .theme-dark .mc-split-item { background: #232a3b; }
+    .theme-dark .mc-split-label { color: #94a3b8; }
+    .theme-dark .mc-split-time { color: #f1f5f9; }
+    .theme-dark .mc-col-divider { background: #2d3548; }
+
+    .mc-card.theme-glass {
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: #f1f5f9;
+    }
+    .theme-glass .mc-skin-panel {
+      background: rgba(255, 255, 255, 0.06);
+      border-right-color: rgba(255, 255, 255, 0.1);
+    }
+    .theme-glass .mc-name { color: #fff; }
+    .theme-glass .mc-elo { color: #fff; }
+    .theme-glass .mc-elo-unit { color: rgba(255,255,255,0.6); }
+    .theme-glass .mc-divider { background: rgba(255,255,255,0.1); }
+    .theme-glass .mc-col-label { color: rgba(255,255,255,0.5); }
+    .theme-glass .mc-cr { color: rgba(255,255,255,0.5); }
+    .theme-glass .mc-best { color: #f1f5f9; }
+    .theme-glass .mc-best span { color: rgba(255,255,255,0.5); }
+    .theme-glass .mc-footer {
+      background: rgba(0,0,0,0.15);
+      border-top-color: rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.4);
+    }
+    .theme-glass .mc-detail-section { border-top-color: rgba(255,255,255,0.1); }
+    .theme-glass .mc-breakdown-table th { color: rgba(255,255,255,0.5); border-bottom-color: rgba(255,255,255,0.1); }
+    .theme-glass .mc-breakdown-table td { color: #f1f5f9; }
+    .theme-glass .mc-wr-bar-track { background: rgba(255,255,255,0.12); }
+    .theme-glass .mc-split-item { background: rgba(255,255,255,0.06); }
+    .theme-glass .mc-split-label { color: rgba(255,255,255,0.5); }
+    .theme-glass .mc-split-time { color: #fff; }
+    .theme-glass .mc-col-divider { background: rgba(255,255,255,0.1); }
   </style>
 </head>
 
 <body>
 
   <div id="card-wrapper" class="hidden">
-    <span class="live-dot" title="Live"></span>
     <div id="card"></div>
   </div>
 
@@ -97,6 +137,7 @@
 
   <script src="/js/data.js"></script>
   <script src="/js/api.js"></script>
+  <script src="/js/matchData.js"></script>
   <script src="/js/ui.js"></script>
   <script src="/js/widget.js"></script>
 </body>

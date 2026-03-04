@@ -482,12 +482,11 @@ img { display: block; max-width: 100%; }
 /* ── Module toggles ──────────────────────────────────────────────────────── */
 .module-toggles {
   display: flex;
-  align-items: center;
-  gap: 20px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 0;
   max-width: 780px;
   margin: 0 auto 24px;
-  padding: 16px 24px;
+  padding: 20px 28px;
   background: var(--surface);
   border-radius: var(--radius-md);
   border: 1px solid var(--border);
@@ -500,43 +499,56 @@ img { display: block; max-width: 100%; }
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 1px;
-  margin-right: 4px;
+  margin-bottom: 14px;
 }
 
 .toggle-switch {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: space-between;
   cursor: pointer;
-  font-size: 0.85rem;
-  font-weight: 600;
+  font-size: 0.95rem;
+  font-weight: 700;
   color: var(--text);
   user-select: none;
+  padding: 14px 0;
+  border-top: 1px solid var(--border);
+}
+
+.toggle-switch:first-of-type {
+  border-top: none;
 }
 
 .toggle-switch input { display: none; }
 
+.toggle-label {
+  flex-shrink: 0;
+  letter-spacing: 0.2px;
+}
+
 .toggle-slider {
   position: relative;
-  width: 38px;
-  height: 20px;
+  width: 48px;
+  min-width: 48px;
+  height: 26px;
   background: #cbd5e1;
   border-radius: 100px;
   transition: background 0.2s;
   flex-shrink: 0;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
 }
 
 .toggle-slider::after {
   content: '';
   position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 16px;
-  height: 16px;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
   background: #fff;
   border-radius: 50%;
   transition: transform 0.2s;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
 
 .toggle-switch input:checked + .toggle-slider {
@@ -544,7 +556,7 @@ img { display: block; max-width: 100%; }
 }
 
 .toggle-switch input:checked + .toggle-slider::after {
-  transform: translateX(18px);
+  transform: translateX(22px);
 }
 
 /* ── Detailed stats sections (DOM) ───────────────────────────────────────── */

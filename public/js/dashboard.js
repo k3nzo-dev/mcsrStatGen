@@ -59,7 +59,10 @@ function updateWidgetUrlDisplay() {
     }
 }
 
-document.getElementById('widget-username').addEventListener('input', updateWidgetUrlDisplay);
+document.getElementById('widget-username').addEventListener('input', () => {
+    updateWidgetUrlDisplay();
+    previewLoaded = false;
+});
 
 // ── Save MCSR username ───────────────────────────────────────────────────
 document.getElementById('save-username-btn').addEventListener('click', async () => {
@@ -94,6 +97,182 @@ document.getElementById('regen-token-btn').addEventListener('click', async () =>
     } catch (err) {
         showToast('Failed: ' + err.message);
     }
+});
+
+// ── Widget Customizer ────────────────────────────────────────────────────
+const wcAccent = document.getElementById('wc-accent-color');
+const wcAccentHex = document.getElementById('wc-accent-hex');
+const wcTheme = document.getElementById('wc-theme');
+const wcBastion = document.getElementById('wc-bastion');
+const wcOverworld = document.getElementById('wc-overworld');
+const wcSplits = document.getElementById('wc-splits');
+const wcSaveBtn = document.getElementById('wc-save-btn');
+const wcSaveStatus = document.getElementById('wc-save-status');
+const wcPreview = document.getElementById('wc-preview-iframe');
+
+let previewDebounce = null;
+let previewLoaded = false;
+
+// ── Iframe scaling via ResizeObserver ────────────────────────────────────
+const WIDGET_BASE_WIDTH = 680;
+let lastWidgetHeight = 300; // default until widget reports
+let lastContainerWidth = 0;
+
+const previewContainer = wcPreview.closest('.preview-container');
+
+function updateIframeScale() {
+    if (!previewContainer) return;
+    const containerWidth = previewContainer.clientWidth;
+    if (containerWidth <= 0) return;
+    const fitScale = containerWidth / WIDGET_BASE_WIDTH;
+    wcPreview.style.transform = 'scale(' + fitScale + ')';
+    wcPreview.style.height = lastWidgetHeight + 'px';
+    previewContainer.style.height = Math.ceil(lastWidgetHeight * fitScale) + 'px';
+    lastContainerWidth = containerWidth;
+}
+
+const resizeObserver = new ResizeObserver((entries) => {
+    const entry = entries[0];
+    if (!entry) return;
+    const newWidth = entry.contentRect.width;
+    // Only recalculate when width actually changes (avoid height-change loops)
+    if (Math.abs(newWidth - lastContainerWidth) > 1) updateIframeScale();
+});
+if (previewContainer) resizeObserver.observe(previewContainer);
+
+// Listen for height updates from widget iframe
+window.addEventListener('message', (e) => {
+    if (e.origin !== location.origin) return;
+    if (!e.data || e.data.type !== 'widget-height-update') return;
+    lastWidgetHeight = e.data.height;
+    updateIframeScale();
+});
+
+function showPreviewLoading() {
+    let loader = document.getElementById('wc-preview-loader');
+    if (!loader) {
+        const container = wcPreview.parentElement;
+        loader = document.createElement('div');
+        loader.id = 'wc-preview-loader';
+        loader.className = 'preview-loader';
+        loader.innerHTML = '<div class="preview-spinner"></div>';
+        container.appendChild(loader);
+    }
+    loader.style.display = '';
+    const err = document.getElementById('wc-preview-error');
+    if (err) err.style.display = 'none';
+}
+
+function hidePreviewLoading() {
+    const loader = document.getElementById('wc-preview-loader');
+    if (loader) loader.style.display = 'none';
+}
+
+function showPreviewError() {
+    hidePreviewLoading();
+    let errEl = document.getElementById('wc-preview-error');
+    if (!errEl) {
+        const container = wcPreview.parentElement;
+        errEl = document.createElement('div');
+        errEl.id = 'wc-preview-error';
+        errEl.className = 'preview-error';
+        errEl.textContent = 'Preview failed to load.';
+        container.appendChild(errEl);
+    }
+    errEl.style.display = '';
+}
+
+wcPreview.addEventListener('load', () => {
+    previewLoaded = true;
+    hidePreviewLoading();
+    updateIframeScale();
+});
+wcPreview.addEventListener('error', () => {
+    previewLoaded = false;
+    showPreviewError();
+});
+
+function getWidgetSettings() {
+    return {
+        accentColor: wcAccent.value,
+        theme: wcTheme.value,
+        showBastion: wcBastion.checked,
+        showOverworld: wcOverworld.checked,
+        showSplits: wcSplits.checked,
+    };
+}
+
+function populateCustomizer(settings) {
+    if (!settings) return;
+    if (settings.accentColor) {
+        wcAccent.value = settings.accentColor;
+        wcAccentHex.textContent = settings.accentColor;
+    }
+    if (settings.theme) wcTheme.value = settings.theme;
+    if (typeof settings.showBastion === 'boolean') wcBastion.checked = settings.showBastion;
+    if (typeof settings.showOverworld === 'boolean') wcOverworld.checked = settings.showOverworld;
+    if (typeof settings.showSplits === 'boolean') wcSplits.checked = settings.showSplits;
+}
+
+function refreshPreview() {
+    const username = document.getElementById('widget-username').value.trim();
+    if (!username || !currentWidgetToken) return;
+    const settings = getWidgetSettings();
+
+    if (previewLoaded && wcPreview.contentWindow) {
+        // Instant update via postMessage (no iframe reload)
+        wcPreview.contentWindow.postMessage({
+            type: 'widget-settings-update',
+            settings,
+        }, location.origin);
+    } else {
+        // First load or username changed — full iframe load with spinner
+        showPreviewLoading();
+        const params = new URLSearchParams({
+            token: currentWidgetToken,
+            theme: settings.theme,
+            accentColor: settings.accentColor,
+            showBastion: settings.showBastion,
+            showOverworld: settings.showOverworld,
+            showSplits: settings.showSplits,
+        });
+        wcPreview.src = '/widget/' + encodeURIComponent(username) + '?' + params.toString();
+    }
+}
+
+function schedulePreviewRefresh() {
+    clearTimeout(previewDebounce);
+    previewDebounce = setTimeout(refreshPreview, 600);
+}
+
+wcAccent.addEventListener('input', () => {
+    wcAccentHex.textContent = wcAccent.value;
+    schedulePreviewRefresh();
+});
+wcTheme.addEventListener('change', schedulePreviewRefresh);
+wcBastion.addEventListener('change', schedulePreviewRefresh);
+wcOverworld.addEventListener('change', schedulePreviewRefresh);
+wcSplits.addEventListener('change', schedulePreviewRefresh);
+
+wcSaveBtn.addEventListener('click', async () => {
+    wcSaveStatus.textContent = '';
+    wcSaveStatus.style.color = '';
+    wcSaveBtn.disabled = true;
+    wcSaveBtn.textContent = 'Saving...';
+    try {
+        const data = await apiPut('/api/me/widget-settings', getWidgetSettings());
+        if (data.error) {
+            wcSaveStatus.textContent = data.error;
+            wcSaveStatus.style.color = '#dc2626';
+        } else {
+            showToast('Widget settings saved!');
+        }
+    } catch (err) {
+        wcSaveStatus.textContent = 'Failed: ' + err.message;
+        wcSaveStatus.style.color = '#dc2626';
+    }
+    wcSaveBtn.disabled = false;
+    wcSaveBtn.textContent = 'Save Widget Settings';
 });
 
 // ── Init ─────────────────────────────────────────────────────────────────
@@ -134,13 +313,17 @@ async function init() {
             document.getElementById('past-due-warning').style.display = '';
         }
 
-        // Toggle widget card based on Pro status
+        // Toggle widget card and customizer based on Pro status
         if (isPro) {
             document.getElementById('widget-card-pro').style.display = '';
             document.getElementById('widget-card-free').style.display = 'none';
+            document.getElementById('widget-customizer').style.display = '';
+            // Populate customizer with saved settings
+            populateCustomizer(me.widget_settings);
         } else {
             document.getElementById('widget-card-pro').style.display = 'none';
             document.getElementById('widget-card-free').style.display = '';
+            document.getElementById('widget-customizer').style.display = 'none';
         }
 
         // Populate widget fields
@@ -149,6 +332,11 @@ async function init() {
             document.getElementById('widget-username').value = me.mcsr_username;
         }
         updateWidgetUrlDisplay();
+
+        // Load live preview if Pro with username set
+        if (isPro && me.mcsr_username) {
+            refreshPreview();
+        }
     } catch { return; }
 }
 

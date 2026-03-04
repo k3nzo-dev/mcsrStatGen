@@ -30,37 +30,5 @@ passport.use(new LocalStrategy(
   }
 ));
 
-if (process.env.GOOGLE_CLIENT_ID) {
-  const GoogleStrategy = require('passport-google-oauth20').Strategy;
-
-  passport.use(new GoogleStrategy(
-    {
-      clientID:     process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL:  process.env.GOOGLE_CALLBACK_URL,
-    },
-    async (_accessToken, _refreshToken, profile, done) => {
-      try {
-        const email    = profile.emails?.[0]?.value ?? null;
-        const avatar   = profile.photos?.[0]?.value ?? null;
-        const { rows } = await pool.query(
-          `INSERT INTO users (google_id, email, display_name, avatar_url)
-           VALUES ($1, $2, $3, $4)
-           ON CONFLICT (google_id) DO UPDATE
-             SET email        = EXCLUDED.email,
-                 display_name = EXCLUDED.display_name,
-                 avatar_url   = EXCLUDED.avatar_url
-           RETURNING *`,
-          [profile.id, email, profile.displayName, avatar]
-        );
-        done(null, rows[0]);
-      } catch (err) {
-        done(err);
-      }
-    }
-  ));
-} else {
-  console.warn('[auth] GOOGLE_CLIENT_ID not set — Google OAuth disabled.');
-}
 
 module.exports = passport;

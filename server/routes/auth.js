@@ -79,26 +79,15 @@ router.post('/login', (req, res, next) => {
   })(req, res, next);
 });
 
-// ── Google OAuth routes (only registered when credentials are set) ──────────
-
-if (process.env.GOOGLE_CLIENT_ID) {
-  router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
-
-  router.get('/google/callback',
-    passport.authenticate('google', { failureRedirect: '/login.html' }),
-    (_req, res) => res.redirect('/dashboard.html')
-  );
-}
-
 // ── Dev login (disabled in production) ─────────────────────────────────────
 
 if (!isProduction) {
   router.post('/dev-login', async (req, res) => {
     try {
       const { rows } = await pool.query(
-        `INSERT INTO users (google_id, email, display_name)
-         VALUES ('dev', 'dev@localhost', 'Dev User')
-         ON CONFLICT (google_id) DO UPDATE
+        `INSERT INTO users (username, display_name)
+         VALUES ('dev', 'Dev User')
+         ON CONFLICT (username) DO UPDATE
            SET display_name = EXCLUDED.display_name
          RETURNING *`
       );

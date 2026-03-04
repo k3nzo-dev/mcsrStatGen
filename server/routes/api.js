@@ -36,7 +36,7 @@ const PRO_PRODUCT_TTL = 5 * 60 * 1000; // 5 minutes
 
 /** Returns which auth methods are available */
 router.get('/auth-config', (_req, res) => {
-  res.json({ googleEnabled: !!process.env.GOOGLE_CLIENT_ID, localEnabled: true });
+  res.json({ localEnabled: true });
 });
 
 /** Public: Stripe product info for the Pro plan */
@@ -121,6 +121,22 @@ router.get('/widget-verify', widgetLimiter, async (req, res) => {
   }
 });
 
+/** Public: fetch widget settings by token */
+router.get('/widget-settings-public', widgetLimiter, async (req, res) => {
+  const { token } = req.query;
+  if (!token) return res.status(400).json({ error: 'token required' });
+  try {
+    const { rows } = await pool.query(
+      'SELECT widget_settings FROM users WHERE widget_token=$1',
+      [token]
+    );
+    if (!rows.length) return res.status(404).json({ error: 'Invalid token.' });
+    res.json({ widget_settings: rows[0].widget_settings || {} });
+  } catch (err) {
+    res.status(500).json({ error: safeError(err) });
+  }
+});
+
 /** Public: resolve overlay token → config */
 const overlayLimiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1 minute
@@ -130,7 +146,10 @@ const overlayLimiter = rateLimit({
 router.get('/overlay/:token', overlayLimiter, async (req, res) => {
   try {
     const { rows } = await pool.query(
-      'SELECT mcsr_username, style, poll_interval FROM overlay_configs WHERE overlay_token=$1',
+      `SELECT oc.mcsr_username, oc.style, oc.poll_interval, u.widget_settings
+       FROM overlay_configs oc
+       JOIN users u ON u.id = oc.user_id
+       WHERE oc.overlay_token=$1`,
       [req.params.token]
     );
     if (!rows.length) return res.status(404).json({ error: 'Not found' });
@@ -145,8 +164,8 @@ router.get('/overlay/:token', overlayLimiter, async (req, res) => {
 router.get('/me', requireAuth, async (req, res) => {
   try {
     const { rows } = await pool.query(
-      `SELECT u.id, u.google_id, u.email, u.display_name, u.avatar_url, u.created_at,
-              u.username, u.widget_token, u.mcsr_username,
+      `SELECT u.id, u.email, u.display_name, u.avatar_url, u.created_at,
+              u.username, u.widget_token, u.mcsr_username, u.widget_settings,
               s.status AS sub_status, s.current_period_end
        FROM users u
        LEFT JOIN subscriptions s ON s.user_id = u.id
@@ -167,6 +186,41 @@ router.put('/me/mcsr-username', requireAuth, requirePro, async (req, res) => {
   try {
     await pool.query('UPDATE users SET mcsr_username=$1 WHERE id=$2', [mcsr_username, req.user.id]);
     res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: safeError(err) });
+  }
+});
+
+// ── Widget settings (Pro only) ───────────────────────────────────────────
+const ALLOWED_WIDGET_KEYS = new Set(['theme', 'accentColor', 'showLivePing', 'showFullStats', 'scale']);
+
+router.put('/me/widget-settings', requireAuth, requirePro, async (req, res) => {
+  try {
+    const raw = req.body ?? {};
+    // Only allow known keys
+    const settings = {};
+    for (const key of ALLOWED_WIDGET_KEYS) {
+      if (key in raw) settings[key] = raw[key];
+    }
+    // Validate specific fields
+    if (settings.theme && !['dark', 'light', 'glass'].includes(settings.theme)) {
+      return res.status(400).json({ error: 'Invalid theme.' });
+    }
+    if (settings.accentColor && !/^#[0-9a-fA-F]{6}$/.test(settings.accentColor)) {
+      return res.status(400).json({ error: 'Invalid accent color.' });
+    }
+    if (settings.scale !== undefined) {
+      const s = Number(settings.scale);
+      if (isNaN(s) || s < 0.5 || s > 2.0) {
+        return res.status(400).json({ error: 'Scale must be between 0.5 and 2.0.' });
+      }
+      settings.scale = s;
+    }
+    if ('showLivePing' in settings) settings.showLivePing = !!settings.showLivePing;
+    if ('showFullStats' in settings) settings.showFullStats = !!settings.showFullStats;
+
+    await pool.query('UPDATE users SET widget_settings=$1 WHERE id=$2', [JSON.stringify(settings), req.user.id]);
+    res.json({ ok: true, widget_settings: settings });
   } catch (err) {
     res.status(500).json({ error: safeError(err) });
   }

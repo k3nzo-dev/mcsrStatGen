@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Purpose
 
-`mcsrStatGen` is a statistics generator for MCSR (Minecraft Speedrun) Ranked. It fetches and processes data from the MCSR Ranked API.
+`mcsrStatGen` is a statistics generator for MCSR (Minecraft Speedrun) Ranked. It fetches and processes data from the MCSR Ranked API, and provides a monetized live OBS widget via Stripe.
 
 ## Allowed External APIs
 
@@ -12,6 +12,8 @@ The following domains are pre-approved for `WebFetch`:
 - `mcsrranked.com`
 - `api.mcsrranked.com`
 - `docs.mcsrranked.com`
+- `stripe.com`
+- `api.stripe.com`
 
 Consult `https://api.mcsrranked.com` or `https://docs.mcsrranked.com` to explore available endpoints before implementing data-fetching logic.
 
