@@ -159,6 +159,72 @@ router.get('/overlay/:token', overlayLimiter, async (req, res) => {
   }
 });
 
+// ── Daily Top Runs (public) ──────────────────────────────────────────────────
+const dailyLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 60,
+  message: { error: 'Too many requests.' },
+});
+
+const cstFormatter = new Intl.DateTimeFormat('en-US', {
+  timeZone: 'America/Chicago',
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+});
+
+function getCSTDate() {
+  const parts = cstFormatter.formatToParts(new Date());
+  const y = parts.find(p => p.type === 'year').value;
+  const m = parts.find(p => p.type === 'month').value;
+  const d = parts.find(p => p.type === 'day').value;
+  return `${y}-${m}-${d}`;
+}
+
+router.get('/daily-top', dailyLimiter, async (req, res) => {
+  try {
+    const date = req.query.date || getCSTDate();
+    const { rows } = await pool.query(
+      'SELECT * FROM daily_top_runs WHERE date_cst = $1 ORDER BY run_time ASC',
+      [date]
+    );
+    res.json({ data: rows });
+  } catch (err) {
+    res.status(500).json({ error: safeError(err) });
+  }
+});
+
+router.get('/historical-stats', dailyLimiter, async (req, res) => {
+  try {
+    const days = Math.min(Math.max(parseInt(req.query.days, 10) || 30, 1), 90);
+    const { rows } = await pool.query(
+      'SELECT * FROM historical_stats ORDER BY date_cst DESC LIMIT $1',
+      [days]
+    );
+    res.json({ data: rows });
+  } catch (err) {
+    res.status(500).json({ error: safeError(err) });
+  }
+});
+
+router.get('/daily-fastest-splits', dailyLimiter, async (req, res) => {
+  try {
+    const date = req.query.date || getCSTDate();
+    const { rows } = await pool.query(
+      'SELECT * FROM daily_fastest_splits WHERE date_cst = $1 ORDER BY split_name ASC, run_time ASC',
+      [date]
+    );
+    const grouped = {};
+    for (const row of rows) {
+      if (!grouped[row.split_name]) grouped[row.split_name] = [];
+      grouped[row.split_name].push(row);
+    }
+    res.json({ data: grouped });
+  } catch (err) {
+    res.status(500).json({ error: safeError(err) });
+  }
+});
+
 // ── Authenticated ───────────────────────────────────────────────────────────
 
 router.get('/me', requireAuth, async (req, res) => {

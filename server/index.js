@@ -10,6 +10,7 @@ const passport = require('./auth');
 const { pool, initSchema } = require('./db');
 const { router: authRouter } = require('./routes/auth');
 const apiRouter = require('./routes/api');
+const { startMatchPoller } = require('./workers/matchPoller');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -169,6 +170,7 @@ app.use(express.static(path.join(__dirname, '../public')));
 // ── Boot ──────────────────────────────────────────────────────────────────────
 initSchema()
   .then(() => {
+    startMatchPoller(pool);
     app.listen(PORT, () => {
       console.log(`[server] listening on http://localhost:${PORT}`);
     });

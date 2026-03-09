@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'none';
+    script-src 'self' https://cdn.jsdelivr.net;
+    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+    font-src https://fonts.gstatic.com;
+    img-src 'self' data:;
+    connect-src 'self';
+  ">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Daily top 100 fastest MCSR Ranked runs, split leaderboards, and historical trends.">
+  <title>Daily Top Runs — MCSR Ranked Stats</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* ── Animations ──────────────────────────────────────────────────────────── */
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(28px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    /* ── Nav ─────────────────────────────────────────────────────────────────── */
+    .tr-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(26, 10, 46, 0.7);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid transparent;
+      transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+      animation: fadeIn 0.3s ease both;
+    }
+    .tr-nav.nav-scrolled {
+      background: rgba(26, 10, 46, 0.92);
+      border-color: var(--border);
+      box-shadow: 0 2px 20px rgba(0,0,0,0.4);
+    }
+    .tr-nav-inner {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 0 32px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .tr-nav-links {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .tr-nav-link {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-decoration: none;
+      padding: 7px 16px;
+      border-radius: var(--radius-sm);
+      border: 1.5px solid var(--border);
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .tr-nav-link:hover {
+      color: #d580f0;
+      border-color: var(--primary);
+    }
+
+    /* ── Header strip ────────────────────────────────────────────────────────── */
+    .tr-header {
+      position: relative;
+      background: rgba(26, 10, 46, 0.55);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      padding: 44px 0 36px;
+      overflow: hidden;
+      color: #fff;
+      animation: fadeIn 0.4s ease both;
+    }
+    .tr-header-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        repeating-linear-gradient(0deg, transparent 0, transparent 31px, rgba(134,1,175,0.06) 31px, rgba(134,1,175,0.06) 32px),
+        repeating-linear-gradient(90deg, transparent 0, transparent 31px, rgba(134,1,175,0.06) 31px, rgba(134,1,175,0.06) 32px);
+      pointer-events: none;
+    }
+    .tr-header-glow {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 80% 120% at 50% 0%, rgba(134,1,175,0.45) 0%, transparent 65%);
+      pointer-events: none;
+    }
+    .tr-header-content {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+      animation: fadeSlideUp 0.45s ease both;
+    }
+    .tr-header-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: rgba(229,229,254,0.45);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 6px;
+    }
+    .tr-header-title {
+      font-size: clamp(1.5rem, 3vw, 2.1rem);
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      line-height: 1.15;
+    }
+
+    /* ── Date picker ─────────────────────────────────────────────────────────── */
+    .tr-date-picker {
+      padding: 9px 14px;
+      border: 1.5px solid rgba(229,229,254,0.2);
+      border-radius: var(--radius-sm);
+      background: rgba(107,31,155,0.15);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 0.9rem;
+      font-weight: 600;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.15s;
+      color-scheme: dark;
+    }
+    .tr-date-picker:focus {
+      border-color: var(--primary);
+    }
+
+    /* ── Main layout ─────────────────────────────────────────────────────────── */
+    .tr-main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 36px 32px 64px;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    /* ── Section card ────────────────────────────────────────────────────────── */
+    .tr-section {
+      background: var(--surface);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--border);
+      padding: 32px;
+      animation: fadeSlideUp 0.5s ease both;
+    }
+    .tr-section:nth-child(1) { animation-delay: 0.05s; }
+    .tr-section:nth-child(2) { animation-delay: 0.14s; }
+    .tr-section:nth-child(3) { animation-delay: 0.23s; }
+    .tr-section:nth-child(4) { animation-delay: 0.32s; }
+
+    .tr-section-title {
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.3px;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+    .tr-section-title-icon {
+      width: 30px;
+      height: 30px;
+      background: rgba(134,1,175,0.2);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+    .tr-section-subtitle {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+
+    /* ── Page-specific overrides ─────────────────────────────────────────────── */
+    .split-card-name {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+    .range-selector {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 20px;
+    }
+    .chart-centered {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .chart-centered-sm {
+      max-width: 420px;
+    }
+
+    /* ── Light text overrides for top-runs ─────────────────────────────────── */
+    .podium-player { color: var(--text); }
+    .podium-time   { color: #a855f7; }
+    .podium-empty  { color: var(--muted); }
+    .top-runs-table th { color: var(--muted); }
+    .top-runs-table td { color: var(--text); }
+    .top-runs-table .col-rank { color: var(--muted); }
+    .top-runs-table .col-time { color: #a855f7; }
+    .top-runs-table tr:nth-child(even) td { background: rgba(107,31,155,0.06); }
+    .top-runs-table tr:hover td { background: rgba(134,1,175,0.12); }
+    .tr-empty { color: var(--muted); }
+
+    /* ── Loading spinner ─────────────────────────────────────────────────────── */
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .tr-spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin: 24px auto;
+    }
+    .tr-empty {
+      text-align: center;
+      padding: 24px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    /* ── Responsive (page-specific) ──────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      .tr-main { padding: 24px 18px 48px; }
+      .tr-section { padding: 22px 18px; }
+      .tr-nav-inner { padding: 0 18px; }
+      .tr-header-content { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ── Nav ──────────────────────────────────────────────────────────────── -->
+  <nav class="tr-nav" id="tr-nav">
+    <div class="tr-nav-inner">
+      <a href="/" class="brand">
+        <span class="brand-icon">&#9201;</span>
+        <span class="brand-name">MCSR Ranked Stats</span>
+      </a>
+      <div class="tr-nav-links">
+        <a href="/" class="tr-nav-link">Home</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── Header strip ─────────────────────────────────────────────────────── -->
+  <div class="tr-header">
+    <div class="tr-header-grid"></div>
+    <div class="tr-header-glow"></div>
+    <div class="container tr-header-content">
+      <div>
+        <p class="tr-header-label">Community Stats</p>
+        <h1 class="tr-header-title">Daily <span class="text-green">Top Runs</span></h1>
+      </div>
+      <input type="date" id="date-picker" class="tr-date-picker">
+    </div>
+  </div>
+
+  <!-- ── Main ─────────────────────────────────────────────────────────────── -->
+  <main class="tr-main">
+
+    <!-- Fastest Splits -->
+    <section class="tr-section" id="fastest-splits-section">
+      <div class="tr-section-title">
+        <span class="tr-section-title-icon">&#9889;</span>
+        Fastest Splits of the Day
+      </div>
+      <p class="tr-section-subtitle">Resets at midnight CST</p>
+      <div class="splits-grid" id="splits-grid">
+        <div class="split-card" id="split-enter_nether">
+          <div class="split-card-name">Enter Nether</div>
+          <div class="podium-empty">Loading...</div>
+        </div>
+        <div class="split-card" id="split-bastion">
+          <div class="split-card-name">Bastion</div>
+          <div class="podium-empty">Loading...</div>
+        </div>
+        <div class="split-card" id="split-fortress">
+          <div class="split-card-name">Fortress</div>
+          <div class="podium-empty">Loading...</div>
+        </div>
+        <div class="split-card" id="split-blind">
+          <div class="split-card-name">Blind</div>
+          <div class="podium-empty">Loading...</div>
+        </div>
+        <div class="split-card" id="split-end_enter">
+          <div class="split-card-name">End Enter</div>
+          <div class="podium-empty">Loading...</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Trends: Splits -->
+    <section class="tr-section" id="trends-section">
+      <div class="tr-section-title">
+        <span class="tr-section-title-icon">&#128200;</span>
+        Average Split Times
+      </div>
+      <p class="tr-section-subtitle">Historical averages across daily top runs</p>
+      <div class="range-selector" id="range-selector">
+        <button class="range-btn" data-days="7">7d</button>
+        <button class="range-btn" data-days="14">14d</button>
+        <button class="range-btn active" data-days="30">30d</button>
+      </div>
+      <div class="chart-centered">
+        <canvas id="splits-chart"></canvas>
+      </div>
+    </section>
+
+    <!-- Top 100 Table -->
+    <section class="tr-section" id="top-runs-table-section">
+      <div class="tr-section-title">
+        <span class="tr-section-title-icon">&#127942;</span>
+        Top 100 Daily Runs
+      </div>
+      <p class="tr-section-subtitle">Fastest completed runs for the selected date</p>
+      <div id="table-loading">
+        <div class="tr-spinner"></div>
+      </div>
+      <table class="top-runs-table" id="top-runs-table" style="display:none">
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Player</th>
+            <th>Time</th>
+            <th>Bastion</th>
+            <th>Seed Type</th>
+            <th>Run Completed (UTC)</th>
+          </tr>
+        </thead>
+        <tbody id="top-runs-tbody"></tbody>
+      </table>
+      <div class="tr-empty" id="table-empty" style="display:none">No runs recorded yet for this date.</div>
+    </section>
+
+  </main>
+
+  <!-- ── Footer ────────────────────────────────────────────────────────────── -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div class="brand brand-sm">
+        <span class="brand-icon">&#9201;</span>
+        <span class="brand-name">MCSR Ranked Stats</span>
+      </div>
+      <p class="footer-text">
+        Powered by the
+        <a href="https://mcsrranked.com" target="_blank" rel="noopener">MCSR Ranked API</a>
+        &middot; Not affiliated with Mojang or Microsoft
+      </p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="/js/topRuns.js" defer></script>
+</body>
+
+</html>

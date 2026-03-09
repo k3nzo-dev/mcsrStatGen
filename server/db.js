@@ -69,6 +69,39 @@ async function initSchema() {
       search_count INT DEFAULT 1
     );
   `);
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS daily_top_runs (
+      id            SERIAL PRIMARY KEY,
+      match_id      INT UNIQUE NOT NULL,
+      user_uuid     TEXT NOT NULL,
+      nickname      TEXT NOT NULL,
+      run_time      INT NOT NULL,
+      date_cst      DATE NOT NULL,
+      bastion_type  TEXT,
+      seed_type     TEXT,
+      timeline_json JSONB,
+      created_at    TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS historical_stats (
+      id                        SERIAL PRIMARY KEY,
+      date_cst                  DATE UNIQUE NOT NULL,
+      avg_run_time              INT,
+      avg_splits_json           JSONB,
+      bastion_distribution_json JSONB
+    );
+
+    CREATE TABLE IF NOT EXISTS daily_fastest_splits (
+      id         SERIAL PRIMARY KEY,
+      split_name TEXT NOT NULL,
+      run_time   INT NOT NULL,
+      match_id   INT NOT NULL,
+      user_uuid  TEXT NOT NULL,
+      nickname   TEXT NOT NULL,
+      date_cst   DATE NOT NULL
+    );
+  `);
 }
 
 module.exports = { pool, initSchema };

@@ -35,7 +35,7 @@
       position: sticky;
       top: 0;
       z-index: 100;
-      background: rgba(255,255,255,0.75);
+      background: rgba(26, 10, 46, 0.7);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       border-bottom: 1px solid transparent;
@@ -43,9 +43,9 @@
       animation: fadeIn 0.3s ease both;
     }
     .up-nav.nav-scrolled {
-      background: rgba(255,255,255,0.95);
+      background: rgba(26, 10, 46, 0.92);
       border-color: var(--border);
-      box-shadow: var(--shadow-sm);
+      box-shadow: 0 2px 20px rgba(0,0,0,0.4);
     }
     .up-nav-inner {
       max-width: var(--max-w);
@@ -60,7 +60,9 @@
     /* ── Hero ─────────────────────────────────────────────────────────────── */
     .up-hero {
       position: relative;
-      background: #0d1e10;
+      background: rgba(26, 10, 46, 0.55);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
       padding: 72px 0 60px;
       overflow: hidden;
       color: #fff;
@@ -71,14 +73,14 @@
       position: absolute;
       inset: 0;
       background-image:
-        repeating-linear-gradient(0deg,   transparent 0, transparent 31px, rgba(58,125,68,0.07) 31px, rgba(58,125,68,0.07) 32px),
-        repeating-linear-gradient(90deg,  transparent 0, transparent 31px, rgba(58,125,68,0.07) 31px, rgba(58,125,68,0.07) 32px);
+        repeating-linear-gradient(0deg,   transparent 0, transparent 31px, rgba(134,1,175,0.06) 31px, rgba(134,1,175,0.06) 32px),
+        repeating-linear-gradient(90deg,  transparent 0, transparent 31px, rgba(134,1,175,0.06) 31px, rgba(134,1,175,0.06) 32px);
       pointer-events: none;
     }
     .up-hero-glow {
       position: absolute;
       inset: 0;
-      background: radial-gradient(ellipse 70% 55% at 50% -5%, rgba(58,125,68,0.5) 0%, transparent 65%);
+      background: radial-gradient(ellipse 70% 55% at 50% -5%, rgba(134,1,175,0.5) 0%, transparent 65%);
       pointer-events: none;
     }
     .up-hero-content {
@@ -94,7 +96,7 @@
     }
     .up-hero-sub {
       font-size: 1.05rem;
-      color: rgba(255,255,255,0.65);
+      color: rgba(229,229,254,0.65);
       max-width: 500px;
       margin: 0 auto;
       line-height: 1.6;
@@ -118,6 +120,8 @@
     }
     .compare-card {
       background: var(--surface);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
       border-radius: var(--radius-lg);
       box-shadow: var(--shadow-md);
       border: 1px solid var(--border);
@@ -126,8 +130,8 @@
     }
     .compare-card:nth-child(2) { animation-delay: 0.08s; }
     .compare-card.compare-pro {
-      border-color: var(--green);
-      box-shadow: 0 4px 24px rgba(58,125,68,0.18);
+      border-color: var(--primary);
+      box-shadow: 0 4px 24px rgba(134,1,175,0.25);
     }
     .compare-card-title {
       font-size: 1.1rem;
@@ -141,7 +145,7 @@
       letter-spacing: -1px;
       margin-bottom: 16px;
     }
-    .compare-card.compare-pro .compare-card-price { color: var(--green); }
+    .compare-card.compare-pro .compare-card-price { color: #d580f0; }
     .compare-features {
       list-style: none;
       margin: 0;
@@ -167,12 +171,12 @@
       background-repeat: no-repeat;
     }
     .compare-features.features-free li::before {
-      background-color: #f1f5f9;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath fill='%236b7280' d='M8.5 13.3 5 9.8l1.1-1.1 2.4 2.4 5-5L14.6 7.2z'/%3E%3C/svg%3E");
+      background-color: rgba(229,229,254,0.08);
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath fill='%23e5e5fe' d='M8.5 13.3 5 9.8l1.1-1.1 2.4 2.4 5-5L14.6 7.2z'/%3E%3C/svg%3E");
     }
     .compare-features.features-pro li::before {
-      background-color: var(--green-muted);
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath fill='%233a7d44' d='M8.5 13.3 5 9.8l1.1-1.1 2.4 2.4 5-5L14.6 7.2z'/%3E%3C/svg%3E");
+      background-color: rgba(134,1,175,0.2);
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath fill='%23d580f0' d='M8.5 13.3 5 9.8l1.1-1.1 2.4 2.4 5-5L14.6 7.2z'/%3E%3C/svg%3E");
     }
     .compare-features .feature-disabled {
       color: var(--muted);
@@ -181,12 +185,14 @@
     }
     .compare-features .feature-disabled::before {
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath fill='%239ca3af' d='M6.3 6.3l7.4 7.4M13.7 6.3l-7.4 7.4' stroke='%239ca3af' stroke-width='1.5' fill='none'/%3E%3C/svg%3E") !important;
-      background-color: #f1f5f9 !important;
+      background-color: rgba(229,229,254,0.05) !important;
     }
 
     /* ── Pricing card (CTA area) ─────────────────────────────────────────── */
     .pricing-card {
       background: var(--surface);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
       border-radius: var(--radius-lg);
       box-shadow: var(--shadow-lg);
       border: 1px solid var(--border);
@@ -204,7 +210,7 @@
     .pricing-card-price {
       font-size: 2.8rem;
       font-weight: 900;
-      color: var(--green);
+      color: #d580f0;
       letter-spacing: -1.5px;
       line-height: 1.1;
       margin-bottom: 4px;
@@ -232,14 +238,14 @@
       font-size: 1rem;
     }
     .pricing-cta:disabled {
-      opacity: 0.6;
+      opacity: 0.4;
       cursor: default;
     }
     .pricing-manage-link {
       display: inline-block;
       margin-top: 12px;
       font-size: 0.85rem;
-      color: var(--green);
+      color: #d580f0;
       font-weight: 600;
       cursor: pointer;
       text-decoration: underline;
@@ -248,11 +254,13 @@
       border: none;
       font-family: var(--font);
     }
-    .pricing-manage-link:hover { color: var(--green-dark); }
+    .pricing-manage-link:hover { color: var(--primary); }
 
     /* ── Manage subscription view ────────────────────────────────────────── */
     .manage-card {
       background: var(--surface);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
       border-radius: var(--radius-lg);
       box-shadow: var(--shadow-lg);
       border: 1px solid var(--border);
@@ -291,12 +299,12 @@
       letter-spacing: 0.3px;
     }
     .status-active {
-      background: var(--green-muted);
-      color: var(--green-dark);
+      background: rgba(134,1,175,0.2);
+      color: #d580f0;
     }
     .status-past-due {
-      background: #fef3c7;
-      color: #92400e;
+      background: rgba(255,61,127,0.15);
+      color: var(--accent);
     }
     .manage-actions {
       display: flex;
@@ -317,13 +325,13 @@
       transition: border-color 0.15s, background 0.15s;
     }
     .btn-outline:hover {
-      border-color: var(--green);
-      background: rgba(58,125,68,0.04);
+      border-color: var(--primary);
+      background: rgba(134,1,175,0.1);
     }
     .btn-outline-danger {
       background: transparent;
-      border: 1.5px solid #dc2626;
-      color: #dc2626;
+      border: 1.5px solid var(--accent);
+      color: var(--accent);
       border-radius: 10px;
       padding: 10px 20px;
       font-size: 0.88rem;
@@ -332,11 +340,11 @@
       cursor: pointer;
       transition: background 0.15s;
     }
-    .btn-outline-danger:hover { background: #fff0f0; }
+    .btn-outline-danger:hover { background: rgba(255,61,127,0.1); }
 
     /* ── Loading skeleton ─────────────────────────────────────────────────── */
     .skeleton {
-      background: linear-gradient(90deg, #e8eef5 25%, #dde5f0 50%, #e8eef5 75%);
+      background: linear-gradient(90deg, rgba(107,31,155,0.15) 25%, rgba(107,31,155,0.25) 50%, rgba(107,31,155,0.15) 75%);
       background-size: 200% 100%;
       animation: shimmer 1.5s infinite;
       border-radius: var(--radius-sm);
@@ -359,8 +367,8 @@
       position: fixed;
       bottom: 28px;
       right: 28px;
-      background: var(--text);
-      color: #fff;
+      background: rgba(26,10,46,0.95);
+      color: var(--text);
       padding: 12px 22px;
       border-radius: var(--radius-md);
       font-size: 0.88rem;
@@ -369,7 +377,8 @@
       pointer-events: none;
       transition: opacity 0.22s;
       z-index: 999;
-      box-shadow: var(--shadow-lg);
+      box-shadow: 0 8px 32px rgba(134,1,175,0.3);
+      border: 1px solid var(--border);
     }
     .toast.show {
       opacity: 1;

@@ -31,13 +31,19 @@
         <span class="brand-name">MCSR Ranked Stats</span>
       </a>
       <div style="display:flex;align-items:center;gap:10px">
+        <a href="/top-runs.html"
+          style="font-size:0.85rem;font-weight:600;color:var(--muted);text-decoration:none;padding:7px 16px;border-radius:var(--radius-sm);border:1.5px solid var(--border);transition:color 0.15s,border-color 0.15s;"
+          onmouseover="this.style.color='#d580f0';this.style.borderColor='var(--primary)'"
+          onmouseout="this.style.color='var(--muted)';this.style.borderColor='var(--border)'">
+          Daily Top Runs
+        </a>
         <a href="/login.html" class="btn btn-sm" id="nav-auth-btn"
-          style="border:1.5px solid rgba(255,255,255,0.35);color:inherit;text-decoration:none;padding:7px 16px;border-radius:var(--radius-sm);">
+          style="border:1.5px solid rgba(229,229,254,0.2);color:var(--text);text-decoration:none;padding:7px 16px;border-radius:var(--radius-sm);">
           Sign In
         </a>
         <form method="POST" action="/auth/logout" id="nav-logout-form" style="display:none;margin:0">
           <button type="submit" class="btn btn-sm"
-            style="border:1.5px solid #dc2626;color:#dc2626;background:transparent;padding:7px 16px;border-radius:var(--radius-sm);cursor:pointer;font-family:var(--font);font-weight:600;font-size:0.82rem;">
+            style="border:1.5px solid var(--accent);color:var(--accent);background:transparent;padding:7px 16px;border-radius:var(--radius-sm);cursor:pointer;font-family:var(--font);font-weight:600;font-size:0.82rem;">
             Sign Out
           </button>
         </form>
