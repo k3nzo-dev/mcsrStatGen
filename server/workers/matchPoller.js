@@ -1,7 +1,7 @@
 /**
  * Match Poller — polls MCSR Ranked API every 2 minutes for completed matches,
- * stores the top 100 fastest runs per day (CST), tracks fastest splits,
- * and rolls up historical stats at midnight CST.
+ * stores the top 100 fastest runs per day (UTC), tracks fastest splits,
+ * and rolls up historical stats at midnight UTC.
  */
 
 const POLL_INTERVAL = 120_000; // 2 minutes
@@ -16,19 +16,12 @@ const SPLIT_MAP = {
   'story.enter_the_end':                'end_enter',
 };
 
-// ── CST Date Helper ──────────────────────────────────────────────────────────
-const cstFormatter = new Intl.DateTimeFormat('en-US', {
-  timeZone: 'America/Chicago',
-  year: 'numeric',
-  month: '2-digit',
-  day: '2-digit',
-});
-
-function getCSTDate() {
-  const parts = cstFormatter.formatToParts(new Date());
-  const y = parts.find(p => p.type === 'year').value;
-  const m = parts.find(p => p.type === 'month').value;
-  const d = parts.find(p => p.type === 'day').value;
+// ── UTC Date Helper ──────────────────────────────────────────────────────────
+function getUTCDate() {
+  const now = new Date();
+  const y = now.getUTCFullYear();
+  const m = String(now.getUTCMonth() + 1).padStart(2, '0');
+  const d = String(now.getUTCDate()).padStart(2, '0');
   return `${y}-${m}-${d}`;
 }
 
@@ -45,16 +38,16 @@ async function fetchJSON(url) {
 
 // ── Main ─────────────────────────────────────────────────────────────────────
 function startMatchPoller(pool) {
-  let lastDateCST = getCSTDate();
+  let lastDateUTC = getUTCDate();
 
   async function poll() {
     try {
-      const todayCST = getCSTDate();
+      const todayUTC = getUTCDate();
 
       // ── Midnight rollover ────────────────────────────────────────────────
-      if (todayCST !== lastDateCST) {
-        await rolloverDay(pool, lastDateCST);
-        lastDateCST = todayCST;
+      if (todayUTC !== lastDateUTC) {
+        await rolloverDay(pool, lastDateUTC);
+        lastDateUTC = todayUTC;
       }
 
       // ── Fetch recent matches ─────────────────────────────────────────────
@@ -85,7 +78,7 @@ function startMatchPoller(pool) {
       const { rows: boardRows } = await pool.query(
         `SELECT COUNT(*)::int AS cnt, MAX(run_time) AS slowest
          FROM daily_top_runs WHERE date_cst = $1`,
-        [todayCST]
+        [todayUTC]
       );
       let boardCount = boardRows[0].cnt;
       let slowest = boardRows[0].slowest;
@@ -124,7 +117,7 @@ function startMatchPoller(pool) {
                (match_id, user_uuid, nickname, run_time, date_cst, bastion_type, seed_type, timeline_json)
              VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
              ON CONFLICT (match_id) DO NOTHING`,
-            [match.id, winnerUuid, nickname, runTime, todayCST, bastionType, seedType,
+            [match.id, winnerUuid, nickname, runTime, todayUTC, bastionType, seedType,
              timelines ? JSON.stringify(timelines) : null]
           );
 
@@ -138,12 +131,12 @@ function startMatchPoller(pool) {
                  ORDER BY run_time DESC
                  LIMIT 1
                )`,
-              [todayCST]
+              [todayUTC]
             );
             // Re-query slowest after deletion
             const { rows: updated } = await pool.query(
               `SELECT MAX(run_time) AS slowest FROM daily_top_runs WHERE date_cst = $1`,
-              [todayCST]
+              [todayUTC]
             );
             slowest = updated[0].slowest;
           } else {
@@ -153,7 +146,7 @@ function startMatchPoller(pool) {
 
           // ── Fastest splits ───────────────────────────────────────────────
           if (Array.isArray(timelines)) {
-            await processSplits(pool, timelines, winnerUuid, nickname, match.id, todayCST);
+            await processSplits(pool, timelines, winnerUuid, nickname, match.id, todayUTC);
           }
         } catch (err) {
           console.error('[MatchPoller] error processing match', match.id, err.message);
@@ -171,7 +164,7 @@ function startMatchPoller(pool) {
 }
 
 // ── Fastest Splits ───────────────────────────────────────────────────────────
-async function processSplits(pool, timelines, winnerUuid, nickname, matchId, dateCST) {
+async function processSplits(pool, timelines, winnerUuid, nickname, matchId, dateUTC) {
   // Extract split times for the winning player
   for (const event of timelines) {
     const splitName = SPLIT_MAP[event.type || event.timeline];
@@ -188,7 +181,7 @@ async function processSplits(pool, timelines, winnerUuid, nickname, matchId, dat
         `SELECT id, run_time FROM daily_fastest_splits
          WHERE split_name = $1 AND date_cst = $2
          ORDER BY run_time ASC`,
-        [splitName, dateCST]
+        [splitName, dateUTC]
       );
 
       if (rows.length < 3) {
@@ -196,7 +189,7 @@ async function processSplits(pool, timelines, winnerUuid, nickname, matchId, dat
           `INSERT INTO daily_fastest_splits
              (split_name, run_time, match_id, user_uuid, nickname, date_cst)
            VALUES ($1, $2, $3, $4, $5, $6)`,
-          [splitName, splitTime, matchId, winnerUuid, nickname, dateCST]
+          [splitName, splitTime, matchId, winnerUuid, nickname, dateUTC]
         );
       } else if (splitTime < rows[rows.length - 1].run_time) {
         // Faster than the 3rd-place entry — insert and remove the slowest
@@ -204,7 +197,7 @@ async function processSplits(pool, timelines, winnerUuid, nickname, matchId, dat
           `INSERT INTO daily_fastest_splits
              (split_name, run_time, match_id, user_uuid, nickname, date_cst)
            VALUES ($1, $2, $3, $4, $5, $6)`,
-          [splitName, splitTime, matchId, winnerUuid, nickname, dateCST]
+          [splitName, splitTime, matchId, winnerUuid, nickname, dateUTC]
         );
         await pool.query(
           `DELETE FROM daily_fastest_splits WHERE id = $1`,

@@ -166,24 +166,17 @@ const dailyLimiter = rateLimit({
   message: { error: 'Too many requests.' },
 });
 
-const cstFormatter = new Intl.DateTimeFormat('en-US', {
-  timeZone: 'America/Chicago',
-  year: 'numeric',
-  month: '2-digit',
-  day: '2-digit',
-});
-
-function getCSTDate() {
-  const parts = cstFormatter.formatToParts(new Date());
-  const y = parts.find(p => p.type === 'year').value;
-  const m = parts.find(p => p.type === 'month').value;
-  const d = parts.find(p => p.type === 'day').value;
+function getUTCDate() {
+  const now = new Date();
+  const y = now.getUTCFullYear();
+  const m = String(now.getUTCMonth() + 1).padStart(2, '0');
+  const d = String(now.getUTCDate()).padStart(2, '0');
   return `${y}-${m}-${d}`;
 }
 
 router.get('/daily-top', dailyLimiter, async (req, res) => {
   try {
-    const date = req.query.date || getCSTDate();
+    const date = req.query.date || getUTCDate();
     const { rows } = await pool.query(
       'SELECT * FROM daily_top_runs WHERE date_cst = $1 ORDER BY run_time ASC',
       [date]
@@ -209,7 +202,7 @@ router.get('/historical-stats', dailyLimiter, async (req, res) => {
 
 router.get('/daily-fastest-splits', dailyLimiter, async (req, res) => {
   try {
-    const date = req.query.date || getCSTDate();
+    const date = req.query.date || getUTCDate();
     const { rows } = await pool.query(
       'SELECT * FROM daily_fastest_splits WHERE date_cst = $1 ORDER BY split_name ASC, run_time ASC',
       [date]
